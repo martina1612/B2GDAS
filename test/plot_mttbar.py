@@ -13,6 +13,8 @@ from optparse import OptionParser
 
 
 def plot_mttbar(argv) : 
+    print "grace was here" 
+
     parser = OptionParser()
 
     parser.add_option('--file_in', type='string', action='store',
