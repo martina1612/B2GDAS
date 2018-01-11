@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+    #! /usr/bin/env python
 
 
 ## _________                _____.__                            __  .__               
@@ -140,6 +140,25 @@ def plot_mttbar(argv) :
     h_AK4Bdisc.Sumw2()
     h_drAK4AK8.Sumw2()
     h_drLepAK4.Sumw2()
+
+
+            # Invariant mass calculation
+    def calculate_invariant_m():
+        lepTopCandP4 = None
+        # Get the z-component of the lepton from the W mass constraint
+        solution, nuz1, nuz2 = solve_nu( vlep=theLepton, vnu=nuCandP4 )
+        # If there is at least one real solution, pick it up
+        if solution :
+            nuCandP4.SetPz( nuz1 )
+        else :
+            nuCandP4.SetPz( nuz1.real )
+
+        lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
+
+        ttbarCand = hadTopCandP4 + lepTopCandP4
+        mttbar = ttbarCand.M()
+        return mttbar
+
     
     fin = ROOT.TFile.Open(options.file_in)
 
@@ -147,6 +166,7 @@ def plot_mttbar(argv) :
 
     tot_entries, count = 0, 0
     cut1, cut2, cut3, cut4 = 0 ,0 ,0 ,0
+    eff_pass, eff_fail = 0, 0
 
     for itree,t in enumerate(trees) :
 
@@ -310,21 +330,15 @@ def plot_mttbar(argv) :
 			#   3: "HLT_PFHT800"
 
             if options.lepton=='mu' :
-
                 if LeptonType[0] != 13 :
                     continue
-
                 # Muon triggers only for now (use HLT_Mu50 with index 0)
-
                 if SemiLeptTrig[0] == 0  :
                     continue
 
             if options.lepton=='ele' :
-    
                 if LeptonType[0] != 11 :
                     continue
-
-
                 # Muon triggers only for now (use HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165 with index 1 and HLT_Ele115_CaloIdVT_GsfTrkIdT with index 2)
                 if SemiLeptTrig[1] == 0 and SemiLeptTrig[2] == 0 :
                     continue
@@ -346,17 +360,22 @@ def plot_mttbar(argv) :
             bdisc = NearestAK4JetBDisc[0]
             pileupWeight=  h_pileupWeight.GetBinContent(SemiLepNvtx[0]+1)
             #Weights
+            #####
+            ### FIX
+            ######
             weight = pileupWeight
             if options.jec =='up':
-                weight = 1*NearestAK4JetJECUpSys[0]*FatJetJECUpSys[0]
+                hadTopCandP4 *= FatJetJECUpSys[0]
+                bJetCandP4 *= NearestAK4JetJECUpSys[0]
             if options.jec =='down':
-                weight = 1*NearestAK4JetJECDnSys[0]*FatJetJECDnSys[0]
+                hadTopCandP4 *= FatJetJECDnSys[0]
+                bJetCandP4 *= NearestAK4JetJECDnSys[0]
             if options.jer =='up':
-                weight = 1*NearestAK4JetJERUpSys[0]*FatJetJECUpSys[0]
+                hadTopCandP4 *= FatJetJERUpSys[0]
+                bJetCandP4 *= NearestAK4JetJERUpSys[0]
             if options.jer =='down':
-                weight = 1*NearestAK4JetJERDnSys[0]*FatJetJECDnSys[0]
-
-            #print weight
+                hadTopCandP4 *= FatJetJERDnSys[0]
+                bJetCandP4 *= NearestAK4JetJERDnSys[0]
             
             #preselection histos            
             h_AK4BdiscPreSel.Fill( NearestAK4JetBDisc[0], weight )
@@ -367,23 +386,6 @@ def plot_mttbar(argv) :
             passTopTag = tau32 < 0.8 and mass_sd > 110. and mass_sd < 250.
             pass2DCut = LeptonPtRel[0] > 20. or LeptonDRMin[0] > 0.4
             passBtag = bdisc > 0.7
-
-            # Invariant mass calculation
-            def calculate_m():
-                lepTopCandP4 = None
-                # Get the z-component of the lepton from the W mass constraint
-                solution, nuz1, nuz2 = solve_nu( vlep=theLepton, vnu=nuCandP4 )
-                # If there is at least one real solution, pick it up
-                if solution :
-                    nuCandP4.SetPz( nuz1 )
-                else :
-                    nuCandP4.SetPz( nuz1.real )
-
-                lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
-
-                ttbarCand = hadTopCandP4 + lepTopCandP4
-                mttbar = ttbarCand.M()
-                return mttbar
 
             # Applying and counting cuts
             if not passKin: 
@@ -397,9 +399,11 @@ def plot_mttbar(argv) :
             if not passBtag: 
                 # Fill control region
                 if not passTopTag: 
+                    eff_fail +=1
                     continue 
                 else:
-                    mttbar = calculate_m()
+                    eff_pass +=1
+                    mttbar = calculate_invariant_m()
                     h_mttbar_control.Fill( mttbar, weight )
                 continue                
             else:
@@ -421,7 +425,7 @@ def plot_mttbar(argv) :
             # number of top and bottom tags
             mttbar = -1.0
 
-            mttbar = calculate_m()
+            mttbar = calculate_invariant_m()
             # Filling plots
             count +=1
             h_mttbar.Fill( mttbar, weight )
@@ -462,17 +466,18 @@ def plot_mttbar(argv) :
     h_cuts.GetXaxis().SetBinLabel(3, "passBtag")
     h_cuts.GetXaxis().SetBinLabel(4, "passTopTag")
 
+    control_eff = float(eff_pass)/float(tot_entries)
     print options.file_out, " : ", count, "/", tot_entries, ", Percentage:", round(float(count)/(float(tot_entries+1))*100,3), "%", \
-     "Cut_flow: [", cut1, cut2, cut3, cut4, "]"
+     "Cut_flow: [", cut1, cut2, cut3, cut4, "]", " Control Efficiency:", control_eff
 
     #fh.write(options.file_in)
-    
-   
     #fh.close
 
     fout.cd()
     fout.Write()
     fout.Close()
+    
+    return control_eff
 
 if __name__ == "__main__" :
-    plot_mttbar(sys.argv)
+    control_eff = plot_mttbar(sys.argv)
