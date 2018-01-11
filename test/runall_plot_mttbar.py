@@ -79,25 +79,32 @@ def names(path):
 # Compile function inputs
 def inputs(outnames, files=run_all, dir_name="root_files", corrs=False):
 	ins = []
-	if corrs == True: corrs = ["", "--jer", "--jec"]
-	else: corrs = [""]
-	for corr in corrs:
+	if corrs == True: correlations = ["--jer", "--jec", "--sf"]
+	else: correlations = [""]
+	for corr in correlations:
 		for shape in ["up", "down"]:
-			for leptype in ['mu', 'ele']:
+			for leptype in ['mu', 'el']:
 				for typ in files.keys(): 
 					for i, n in enumerate(run_all[typ]):
+						data = "False"
+						if typ == 'singleMuon' or typ == 'SingleElectron': data = "True"
+						if typ == 'singleMuon' and leptype == 'el': continue
+						if typ == 'SingleElectron' and leptype == 'mu': continue
+						if data == "True":
+							if shape == "down": continue
+							if "all" not in outnames[typ][i].lower(): continue
+						print outnames[typ][i]
 						in_file = run_all[typ][i]					
 						make_dirs(dir_name)
 						# Raw files
-						if corr == "" and shape=="up": 
+						if corrs == False: 
 							out_file = "root_files/"+outnames[typ][i]+"_plots_"+leptype+".root"
-							ins.append(["--file_in", in_file, "--file_out", out_file, "--lepton", leptype ]) 
-							continue
-						if corr == "" and shape=="down":
-							continue
-						# JER/JEC Files
-						out_file = "root_files/"+outnames[typ][i]+"_plots_"+leptype+"_"+corr[2:]+"_"+shape+".root"
-						ins.append(["--file_in", in_file, "--file_out", out_file, "--lepton", leptype, corr, shape]) 
+							ins.append(["--file_in", in_file, "--file_out", out_file, "--lepton", leptype, '--isData', data ]) 
+						else:
+						# Systematic modified files
+							if data == "True": continue
+							out_file = "root_files/"+outnames[typ][i]+"_plots_"+leptype+"_"+corr[2:]+"_"+shape+".root"
+							ins.append(["--file_in", in_file, "--file_out", out_file, "--lepton", leptype, corr, shape, '--isData', data]) 
 	return ins
 #############
 #############
@@ -105,7 +112,7 @@ def inputs(outnames, files=run_all, dir_name="root_files", corrs=False):
 if __name__ == "__main__" :
 	path = "/store/user/cmsdas/2018/long_exercises/B2GTTbar/"
 	run_all, outnames = names(path)
-	ins = inputs(outnames, files=run_all, corrs=False)
+	ins = inputs(outnames, files=data, corrs=False)
 	# Run in parallel
 	from multiprocessing import Pool
 	p = Pool(22)
