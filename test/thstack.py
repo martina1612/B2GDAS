@@ -1,6 +1,7 @@
 #!/bin/python
 import ROOT
 import copy
+import os.path
 from optparse import OptionParser
 # Taken from https://root.cern.ch/doc/v608/classTHStack.html
 # Converted to python just for you!
@@ -19,6 +20,8 @@ parser.add_option('--isM', action='store_true',
 (options, args) = parser.parse_args()
 
 #sig = options.sig
+
+print ""
 
 #Decides Colors based on bkg
 def decideColor(filename):
@@ -121,6 +124,8 @@ for inp in filelistbkg:
 
 outname = "stacked_plots"+findMe
 
+skippedCount = 0
+
 # Filling with bkg hists
 for filename  in filelistbkg:
     if findMe in filename:
@@ -129,6 +134,17 @@ for filename  in filelistbkg:
             weight = float(weights[tag])
     else:
         continue
+
+    if not (os.path.isfile(filename)) :
+        print "!!! ERROR !!! %s does not exist. Skipping file." % filename
+        skippedCount += 1
+        continue
+    if ( os.path.getsize(filename) == 0 ) :
+        print "!!! ERROR !!! %s has size 0. Skipping file." % filename
+        skippedCount += 1
+        continue
+
+    print "Reading %s" % filename
     color = decideColor(filename)
 #    print color
     file = ROOT.TFile(filename);
@@ -197,7 +213,7 @@ for filename  in filelistbkg:
     stack_AK4M.Add(copy.deepcopy(h_AK4M));
     stack_AK4BDisc.Add(copy.deepcopy(h_AK4BDisc));
 
-
+print "\n%d background file(s) skipped.\n" % skippedCount
 
 # Create a canvas to print to
 cs1 = ROOT.TCanvas("cs1","cs1",10,10,700,900);
@@ -267,7 +283,7 @@ if options.isM :
     filelistdata = ["inputfolder/CMSDAS/SingleElectron_2016_All_plots_mu.root"]
 
 for filename  in filelistdata:
-    print filename
+    print "Using Data file: %s.\n" % filename
     if findMe in filename:
         tag = filename.replace("_plots_"+findMe+".root","")
     else:
