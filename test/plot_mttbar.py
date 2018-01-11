@@ -432,8 +432,9 @@ def plot_mttbar(argv) :
     print options.file_out, " : ", count, "/", tot_entries, ", Percentage:", round(float(count)/(float(tot_entries+1))*100,3), "%", \
      "Cut_flow: [", cut1, cut2, cut3, cut4, "]"
 
+    nm = str(count)
     fh.write(options.file_in)
-    fh.write("  "+str(count))
+    fh.write("  "+ nm[-2:])
     fh.write('\n')
     fh.close
 

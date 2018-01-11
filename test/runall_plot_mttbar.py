@@ -40,6 +40,8 @@ outnames = {
 
 # Extract file names
 for name in filenames.keys():
+        if name != 'rsg': 
+        	continue
 	files, outfiles = [], []
 	batcmd="xrdfs root://cmseos.fnal.gov ls -u /store/user/cmsdas/2018/long_exercises/B2GTTbar/"
 	temps = subprocess.check_output(batcmd, shell=True)
