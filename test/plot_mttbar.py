@@ -46,7 +46,7 @@ def plot_mttbar(argv) :
         
     (options, args) = parser.parse_args(argv)
     argv = []
-
+    
     #write to temp file
     #fh = open("num.txt", "a")
 
@@ -115,7 +115,8 @@ def plot_mttbar(argv) :
 #    h_drLepAK8    = ROOT.TH1F("h_drLepAK8",";{#delta r}_{lep, AK8} ;Number", 100, 0, 1500)
     h_drLepAK4    = ROOT.TH1F("h_drLepAK4"+histogramSuffix,";#DeltaR_{lep, AK4} ;Number", 100, 0, 5)
     h_dPhiLepAK8 = ROOT.TH1F("h_dPhiLepAK8"+histogramSuffix,";#Delta#phi_{l,AK8};Number", 100, 0.0, 1.0)
-
+    # vertex info
+    h_nvertex = ROOT.TH1F("h_nvertex"+histogramSuffix,"Nvertices;nvertex;Number", 100, 0.0, 100)
     
     fin = ROOT.TFile.Open(options.file_in)
 
@@ -390,7 +391,8 @@ def plot_mttbar(argv) :
             mttbar = ttbarCand.M()
 			
 
-            # Filling plots
+            # Filling plots 
+            if options.isData: weight =1
             count +=1
             h_mttbar.Fill( mttbar, weight )
             h_mtopHadGroomed.Fill( mass_sd, weight )
@@ -420,6 +422,8 @@ def plot_mttbar(argv) :
 
 
             h_dPhiLepAK8.Fill(FatJetDeltaPhiLep[0], weight )
+            
+            h_nvertex.Fill(SemiLepNvtx[0],weight)
 
     # Fill cut-flow
     h_cuts.SetBinContent(1, cut1)
