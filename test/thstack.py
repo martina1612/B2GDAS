@@ -13,7 +13,12 @@ parser.add_option('--isE', action='store_true',
 parser.add_option('--isM', action='store_true',
                       dest='isM',
                       default = False,help='Selects Muons')
+#parser.add_option('--sig', action='store', dest='sig', type='int' ,
+#		      default = '0', help='Integer selects signal sample to plot')
+
 (options, args) = parser.parse_args()
+
+#sig = options.sig
 
 #Decides Colors based on bkg
 def decideColor(filename):
@@ -49,7 +54,11 @@ stack_AK4Phi = ROOT.THStack("AK4Phi","AK4Phi");
 stack_AK4M = ROOT.THStack("AK4M","AK4M");
 stack_AK4BDisc = ROOT.THStack("AK4BDisc","AK4BDisc");
 
-# Data Input files
+#if sig >= len(filelistdata) :
+#    print "--sig not valid. Choose one from 0 to %d." % (len(filelistdata)-1)
+#    exit()
+#else :
+#    filelistdata = [ filelistdata[sig] ]
 
 # Bkg Input files
 filelistbkg = [
@@ -112,6 +121,7 @@ for inp in filelistbkg:
 
 outname = "stacked_plots"+findMe
 
+# Filling with bkg hists
 for filename  in filelistbkg:
     if findMe in filename:
         tag = filename.replace("_plots_"+findMe+".root","")
@@ -120,9 +130,9 @@ for filename  in filelistbkg:
     else:
         continue
     color = decideColor(filename)
-    print color
+#    print color
     file = ROOT.TFile(filename);
-    print filename
+#    print filename
     # Reading hists from file
     h_lepPt   = file.Get("h_lepPt");
     h_lepEta  = file.Get("h_lepEta");
@@ -162,6 +172,18 @@ for filename  in filelistbkg:
     h_AK4M.SetFillColor(color);
     h_AK4BDisc.SetFillColor(color);
 
+    h_lepPt.SetLineColor(color);
+    h_lepEta.SetLineColor(color);
+    h_lepPhi.SetLineColor(color);
+    h_AK8Pt.SetLineColor(color);
+    h_AK8Eta.SetLineColor(color);
+    h_AK8Phi.SetLineColor(color);
+    h_AK4Pt.SetLineColor(color);
+    h_AK4Eta.SetLineColor(color);
+    h_AK4Phi.SetLineColor(color);
+    h_AK4M.SetLineColor(color);
+    h_AK4BDisc.SetLineColor(color);
+
     # Filling stacks
     stack_lepPt.Add(copy.deepcopy(h_lepPt));
     stack_lepEta.Add(copy.deepcopy(h_lepEta));
@@ -174,6 +196,8 @@ for filename  in filelistbkg:
     stack_AK4Phi.Add(copy.deepcopy(h_AK4Phi));
     stack_AK4M.Add(copy.deepcopy(h_AK4M));
     stack_AK4BDisc.Add(copy.deepcopy(h_AK4BDisc));
+
+
 
 # Create a canvas to print to
 cs1 = ROOT.TCanvas("cs1","cs1",10,10,700,900);
@@ -195,7 +219,7 @@ T.SetTextAlign(21);
 cs3.Divide(2,2);
 
 
-# Select each canvas, draw a histogram for each option
+# Select each canvas, draw bkg stacks
 cs1.cd(1);
 stack_lepPt.Draw();
 cs1.cd(2);
@@ -235,6 +259,123 @@ stack_AK4BDisc.Draw();
 #stack.Draw("lego1");
 #T.DrawTextNDC(.5,.95,"Option \"lego1\""); # use the "lego" plot option (just for fun)
 
+
+# Filling with Signal graphs
+if options.isE :
+    filelistdata = ["inputfolder/CMSDAS/SingleElectron_2016_All_plots_ele.root"]
+if options.isM :
+    filelistdata = ["inputfolder/CMSDAS/SingleElectron_2016_All_plots_mu.root"]
+
+for filename  in filelistdata:
+    print filename
+    if findMe in filename:
+        tag = filename.replace("_plots_"+findMe+".root","")
+    else:
+        continue
+    color = ROOT.kBlack;
+#    print color
+    file = ROOT.TFile(filename);
+#    print filename
+    # Reading hists from file
+    h_lepPt   = file.Get("h_lepPt");
+    h_lepEta  = file.Get("h_lepEta");
+    h_lepPhi  = file.Get("h_lepPhi");
+    h_AK8Pt   = file.Get("h_AK8Pt");
+    h_AK8Eta  = file.Get("h_AK8Eta");
+    h_AK8Phi  = file.Get("h_AK8Phi");
+    h_AK4Pt   = file.Get("h_AK4Pt");
+    h_AK4Eta  = file.Get("h_AK4Eta");
+    h_AK4Phi  = file.Get("h_AK4Phi");
+    h_AK4M    = file.Get("h_AK4M");
+    h_AK4BDisc = file.Get("h_AK4Bdisc");
+
+    h_lepPt.SetMarkerStyle(20);
+    h_lepEta.SetMarkerStyle(20);
+    h_lepPhi.SetMarkerStyle(20);
+    h_AK8Pt.SetMarkerStyle(20);
+    h_AK8Eta.SetMarkerStyle(20);
+    h_AK8Phi.SetMarkerStyle(20);
+    h_AK4Pt.SetMarkerStyle(20);
+    h_AK4Eta.SetMarkerStyle(20);
+    h_AK4Phi.SetMarkerStyle(20);
+    h_AK4M.SetMarkerStyle(20);
+    h_AK4BDisc.SetMarkerStyle(20);
+
+    # Set color for this process
+    h_lepPt.SetMarkerColor(color);
+    h_lepEta.SetMarkerColor(color);
+    h_lepPhi.SetMarkerColor(color);
+    h_AK8Pt.SetMarkerColor(color);
+    h_AK8Eta.SetMarkerColor(color);
+    h_AK8Phi.SetMarkerColor(color);
+    h_AK4Pt.SetMarkerColor(color);
+    h_AK4Eta.SetMarkerColor(color);
+    h_AK4Phi.SetMarkerColor(color);
+    h_AK4M.SetMarkerColor(color);
+    h_AK4BDisc.SetMarkerColor(color);
+
+    h_lepPt.SetLineColor(color);
+    h_lepEta.SetLineColor(color);
+    h_lepPhi.SetLineColor(color);
+    h_AK8Pt.SetLineColor(color);
+    h_AK8Eta.SetLineColor(color);
+    h_AK8Phi.SetLineColor(color);
+    h_AK4Pt.SetLineColor(color);
+    h_AK4Eta.SetLineColor(color);
+    h_AK4Phi.SetLineColor(color);
+    h_AK4M.SetLineColor(color);
+    h_AK4BDisc.SetLineColor(color);
+
+    h_lepPt.SetMarkerSize(0.7);
+    h_lepEta.SetMarkerSize(0.7);
+    h_lepPhi.SetMarkerSize(0.7);
+    h_AK8Pt.SetMarkerSize(0.7);
+    h_AK8Eta.SetMarkerSize(0.7);
+    h_AK8Phi.SetMarkerSize(0.7);
+    h_AK4Pt.SetMarkerSize(0.7);
+    h_AK4Eta.SetMarkerSize(0.7);
+    h_AK4Phi.SetMarkerSize(0.7);
+    h_AK4M.SetMarkerSize(0.7);
+    h_AK4BDisc.SetMarkerSize(0.7);
+
+    # Filling stacks
+#    stack_lepPt.Add(copy.deepcopy(h_lepPt));
+#    stack_lepEta.Add(copy.deepcopy(h_lepEta));
+#    stack_lepPhi.Add(copy.deepcopy(h_lepPhi));
+#    stack_AK8Pt.Add(copy.deepcopy(h_AK8Pt));
+#    stack_AK8Eta.Add(copy.deepcopy(h_AK8Eta));
+#    stack_AK8Phi.Add(copy.deepcopy(h_AK8Phi));
+#    stack_AK4Pt.Add(copy.deepcopy(h_AK4Pt));
+#    stack_AK4Eta.Add(copy.deepcopy(h_AK4Eta));
+#    stack_AK4Phi.Add(copy.deepcopy(h_AK4Phi));
+#    stack_AK4M.Add(copy.deepcopy(h_AK4M));
+#    stack_AK4BDisc.Add(copy.deepcopy(h_AK4BDisc));
+
+    cs1.cd(1);
+    h_lepPt.Draw("PESAME");
+    cs1.cd(2);
+    h_lepEta.Draw("SAMEPE");
+    cs1.cd(3);
+    h_lepPhi.Draw("SAMEPE");
+    cs1.cd(4);
+    h_AK8Pt.Draw("SAMEPE");
+    
+    cs2.cd(1);
+    h_AK8Eta.Draw("SAMEPE");
+    cs2.cd(2);
+    h_AK8Phi.Draw("SAMEPE");
+    cs2.cd(3);
+    h_AK4Pt.Draw("SAMEPE");
+    cs2.cd(4);
+    h_AK4Eta.Draw("SAMEPE");
+    
+    cs3.cd(1);
+    h_AK4Phi.Draw("SAMEPE");
+    cs3.cd(2);
+    h_AK4M.Draw("SAMEPE");
+    cs3.cd(3);
+    h_AK4BDisc.Draw("SAMEPE");
+    
 # Output file
 outfilename = outname+"_stacked.root"
 outfile = ROOT.TFile(outfilename, "RECREATE");
