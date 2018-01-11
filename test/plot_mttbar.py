@@ -46,7 +46,7 @@ def plot_mttbar(argv) :
         
     (options, args) = parser.parse_args(argv)
     argv = []
-
+    
     #write to temp file
     #fh = open("num.txt", "a")
 
@@ -119,6 +119,11 @@ def plot_mttbar(argv) :
     h_drAK4AK8    = ROOT.TH1F("h_drAK4AK8"+histogramSuffix,";#DeltaR_{AK4, AK8} ;Number", 100, 0, 5)
 #    h_drLepAK8    = ROOT.TH1F("h_drLepAK8",";{#delta r}_{lep, AK8} ;Number", 100, 0, 1500)
     h_drLepAK4    = ROOT.TH1F("h_drLepAK4"+histogramSuffix,";#DeltaR_{lep, AK4} ;Number", 100, 0, 5)
+
+    h_dPhiLepAK8 = ROOT.TH1F("h_dPhiLepAK8"+histogramSuffix,";#Delta#phi_{l,AK8};Number", 100, 0.0, 1.0)
+    # vertex info
+    h_nvertex = ROOT.TH1F("h_nvertex"+histogramSuffix,"Nvertices;nvertex;Number", 100, 0.0, 100)
+
 #    h_dPhiLepAK8 = ROOT.TH1F("h_dPhiLepAK8"+histogramSuffix,";#Delta#phi_{l,AK8};Number", 100, 0.0, 1.0) #Not actually filled in any of the ntuples
 
     #Following lines is to make sure that the statistical errors are kept and stored
@@ -140,7 +145,9 @@ def plot_mttbar(argv) :
     h_AK4Bdisc.Sumw2()
     h_drAK4AK8.Sumw2()
     h_drLepAK4.Sumw2()
-    
+    h_dPhiLepAK8.Sumw2()
+    h_nvertex.Sumw2()
+
     fin = ROOT.TFile.Open(options.file_in)
 
     trees = [ fin.Get("TreeSemiLept") ]
@@ -420,9 +427,11 @@ def plot_mttbar(argv) :
             # Now we do our kinematic calculation based on the categories of the
             # number of top and bottom tags
             mttbar = -1.0
-
             mttbar = calculate_m()
-            # Filling plots
+
+            # Filling plots 
+            if options.isData: weight =1
+
             count +=1
             h_mttbar.Fill( mttbar, weight )
             h_mtopHadGroomed.Fill( mass_sd, weight )
@@ -450,7 +459,9 @@ def plot_mttbar(argv) :
             h_AK8Tau32.Fill(FatJetTau32[0], weight )
             h_AK8Tau21.Fill(FatJetTau21[0], weight )
 
-            #h_dPhiLepAK8.Fill(FatJetDeltaPhiLep[0], weight )
+            h_dPhiLepAK8.Fill(FatJetDeltaPhiLep[0], weight )
+            
+            h_nvertex.Fill(SemiLepNvtx[0],weight )
 
     # Fill cut-flow
     h_cuts.SetBinContent(1, cut1)
