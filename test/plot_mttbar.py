@@ -80,8 +80,8 @@ def plot_mttbar(argv) :
     if options.jer == 'down' :
 	    histogramSuffix += '_jer_Down'
 
-    #fpileup = ROOT.TFile.Open('purw.root', 'read')
-    #h_pileupWeight = fpileup.Get('pileup') 
+    fpileup = ROOT.TFile.Open('purw.root', 'read')
+    h_pileupWeight = fpileup.Get('pileup') 
 
     fout= ROOT.TFile(options.file_out, "RECREATE")
     fout.cd()
@@ -151,14 +151,12 @@ def plot_mttbar(argv) :
     h_AK4Bdisc.Sumw2()
     h_drAK4AK8.Sumw2()
     h_drLepAK4.Sumw2()
-<<<<<<< HEAD
     h_AK8E.Sumw2()
     h_AK8bDiscB.Sumw2()
     h_AK8bDiscW.Sumw2()
     h_AK8sj_bm.Sumw2()
     h_AK8sj_Wm.Sumw2()
-    
-=======
+
     h_dPhiLepAK8.Sumw2()
     h_nvertex.Sumw2()
 
@@ -179,7 +177,7 @@ def plot_mttbar(argv) :
         mttbar = ttbarCand.M()
         return mttbar
 
->>>>>>> 192847445957fb2cdc8b0b019adbf0547b73ef68
+
     fin = ROOT.TFile.Open(options.file_in)
 
     trees = [ fin.Get("TreeSemiLept") ]
