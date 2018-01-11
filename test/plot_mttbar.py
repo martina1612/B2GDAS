@@ -58,10 +58,10 @@ def plot_mttbar(argv) :
                       default = False,
                       help='Is this Data?')
         
-    parser.add_option('--pileup', action='store_true',
+    parser.add_option('--pileup',type='string',  action='store',
                       dest='pileup',
                       default = None,
-                      help='Choise for pileup cros section shift')
+                      help='Choice for pileup cros section shift')
     
     (options, args) = parser.parse_args(argv)
     argv = []
@@ -107,7 +107,7 @@ def plot_mttbar(argv) :
 	fpilup = ROOT.TFile.Open('purw_up.root','read')
         histogramSuffix += '_pileupUp'
     if options.pileup == "down":
-	fpileup = ROOT.TFile.Opne('purw_down.root','read')
+	fpileup = ROOT.TFile.Open('purw_down.root','read')
         histogramSuffix += '_pileupDown'
           
      
