@@ -145,14 +145,14 @@ for filename  in filelistbkg:
     else:
         continue
 
-    if not (os.path.isfile(filename)) :
-        print "!!! ERROR !!! %s does not exist. Skipping file." % filename
-        skippedCount += 1
-        continue
-    if ( os.path.getsize(filename) == 0 ) :
-        print "!!! ERROR !!! %s has size 0. Skipping file." % filename
-        skippedCount += 1
-        continue
+#    if not (os.path.isfile(filename)) :
+#        print "!!! ERROR !!! %s does not exist. Skipping file." % filename
+#        skippedCount += 1
+#        continue
+#    if ( os.path.getsize(filename) == 0 ) :
+#        print "!!! ERROR !!! %s has size 0. Skipping file." % filename
+#        skippedCount += 1
+#        continue
 
     print "Reading %s" % filename
     color = decideColor(filename)
