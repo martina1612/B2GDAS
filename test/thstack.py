@@ -14,6 +14,9 @@ parser.add_option('--isE', action='store_true',
 parser.add_option('--isM', action='store_true',
                       dest='isM',
                       default = False,help='Selects Muons')
+parser.add_option('--log', action='store_true',
+                      dest='log',
+                      default = False,help='Set log Y')
 #parser.add_option('--sig', action='store', dest='sig', type='int' ,
 #		      default = '0', help='Integer selects signal sample to plot')
 
@@ -56,6 +59,19 @@ stack_AK4Eta = ROOT.THStack("AK4Eta","AK4Eta");
 stack_AK4Phi = ROOT.THStack("AK4Phi","AK4Phi");
 stack_AK4M = ROOT.THStack("AK4M","AK4M");
 stack_AK4BDisc = ROOT.THStack("AK4BDisc","AK4BDisc");
+
+#Define the data histograms
+h_lepPtdata   = ROOT.TH1F()
+h_lepEtadata  = ROOT.TH1F()
+h_lepPhidata  = ROOT.TH1F()
+h_AK8Ptdata   = ROOT.TH1F()
+h_AK8Etadata  = ROOT.TH1F()
+h_AK8Phidata  = ROOT.TH1F()
+h_AK4Ptdata   = ROOT.TH1F()
+h_AK4Etadata  = ROOT.TH1F()
+h_AK4Phidata  = ROOT.TH1F()
+h_AK4Mdata    = ROOT.TH1F()
+h_AK4BDiscdata = ROOT.TH1F() 
 
 #if sig >= len(filelistdata) :
 #    print "--sig not valid. Choose one from 0 to %d." % (len(filelistdata)-1)
@@ -216,64 +232,52 @@ for filename  in filelistbkg:
 print "\n%d background file(s) skipped.\n" % skippedCount
 
 # Create a canvas to print to
-cs1 = ROOT.TCanvas("cs1","cs1",10,10,700,900);
-T = ROOT.TText();
-T.SetTextFont(42);
-T.SetTextAlign(21);
-cs1.Divide(2,2);
+#cs1 = ROOT.TCanvas("cs1","cs1",10,10,700,900);
+#T = ROOT.TText();
+#T.SetTextFont(42);
+#T.SetTextAlign(21);
+#cs1.Divide(2,2);
 
-cs2 = ROOT.TCanvas("cs2","cs2",10,10,700,900);
-T = ROOT.TText();
-T.SetTextFont(42);
-T.SetTextAlign(21);
-cs2.Divide(2,2);
+#cs2 = ROOT.TCanvas("cs2","cs2",10,10,700,900);
+#T = ROOT.TText();
+#T.SetTextFont(42);
+#T.SetTextAlign(21);
+#cs2.Divide(2,2);
 
-cs3 = ROOT.TCanvas("cs3","cs3",10,10,700,900);
-T = ROOT.TText();
-T.SetTextFont(42);
-T.SetTextAlign(21);
-cs3.Divide(2,2);
+#cs3 = ROOT.TCanvas("cs3","cs3",10,10,700,900);
+#T = ROOT.TText();
+#T.SetTextFont(42);
+#T.SetTextAlign(21);
+#cs3.Divide(2,2);
 
 
 # Select each canvas, draw bkg stacks
-cs1.cd(1);
-stack_lepPt.Draw();
-cs1.cd(2);
-stack_lepEta.Draw();
-cs1.cd(3);
-stack_lepPhi.Draw();
-cs1.cd(4);
-stack_AK8Pt.Draw();
+#cs1.cd(1);
+#stack_lepPt.Draw();
+#cs1.cd(2);
+#stack_lepEta.Draw();
+#cs1.cd(3);
+#stack_lepPhi.Draw();
+#cs1.cd(4);
+#stack_AK8Pt.Draw();
 
-cs2.cd(1);
-stack_AK8Eta.Draw();
-cs2.cd(2);
-stack_AK8Phi.Draw();
-cs2.cd(3);
-stack_AK4Pt.Draw();
-cs2.cd(4);
-stack_AK4Eta.Draw();
+#cs2.cd(1);
+#stack_AK8Eta.Draw();
+#cs2.cd(2);
+#stack_AK8Phi.Draw();
+#cs2.cd(3);
+#stack_AK4Pt.Draw();
+#cs2.cd(4);
+#stack_AK4Eta.Draw();
 
-cs3.cd(1);
-stack_AK4Phi.Draw();
-cs3.cd(2);
-stack_AK4M.Draw();
-cs3.cd(3);
-stack_AK4BDisc.Draw();
+#cs3.cd(1);
+#stack_AK4Phi.Draw();
+#cs3.cd(2);
+#stack_AK4M.Draw();
+#cs3.cd(3);
+#stack_AK4BDisc.Draw();
 
 #T.DrawTextNDC(.5,.95,"Default drawing option"); # use the default option
-#
-#cs.cd(2);
-#stack.Draw("nostack");
-#T.DrawTextNDC(.5,.95,"Option \"nostack\""); # use the "no stack" option
-#
-#cs.cd(3);
-#stack.Draw("nostackb");
-#T.DrawTextNDC(.5,.95,"Option \"nostackb\""); # use the no stack + bar chart option
-#
-#cs.cd(4);
-#stack.Draw("lego1");
-#T.DrawTextNDC(.5,.95,"Option \"lego1\""); # use the "lego" plot option (just for fun)
 
 
 # Filling with Signal graphs
@@ -281,6 +285,8 @@ if options.isE :
     filelistdata = ["inputfolder/CMSDAS/SingleElectron_2016_All_plots_ele.root"]
 if options.isM :
     filelistdata = ["inputfolder/CMSDAS/SingleElectron_2016_All_plots_mu.root"]
+else :
+    filelistdata = ["inputfolder/CMSDAS/SingleElectron_2016_All_plots_ele.root"]
 
 for filename  in filelistdata:
     print "Using Data file: %s.\n" % filename
@@ -293,108 +299,153 @@ for filename  in filelistdata:
     file = ROOT.TFile(filename);
 #    print filename
     # Reading hists from file
-    h_lepPt   = file.Get("h_lepPt");
-    h_lepEta  = file.Get("h_lepEta");
-    h_lepPhi  = file.Get("h_lepPhi");
-    h_AK8Pt   = file.Get("h_AK8Pt");
-    h_AK8Eta  = file.Get("h_AK8Eta");
-    h_AK8Phi  = file.Get("h_AK8Phi");
-    h_AK4Pt   = file.Get("h_AK4Pt");
-    h_AK4Eta  = file.Get("h_AK4Eta");
-    h_AK4Phi  = file.Get("h_AK4Phi");
-    h_AK4M    = file.Get("h_AK4M");
-    h_AK4BDisc = file.Get("h_AK4Bdisc");
+    h_lepPtdata   = file.Get("h_lepPt");
+    h_lepEtadata  = file.Get("h_lepEta");
+    h_lepPhidata  = file.Get("h_lepPhi");
+    h_AK8Ptdata   = file.Get("h_AK8Pt");
+    h_AK8Etadata  = file.Get("h_AK8Eta");
+    h_AK8Phidata  = file.Get("h_AK8Phi");
+    h_AK4Ptdata   = file.Get("h_AK4Pt");
+    h_AK4Etadata  = file.Get("h_AK4Eta");
+    h_AK4Phidata  = file.Get("h_AK4Phi");
+    h_AK4Mdata    = file.Get("h_AK4M");
+    h_AK4BDiscdata = file.Get("h_AK4Bdisc");
 
-    h_lepPt.SetMarkerStyle(20);
-    h_lepEta.SetMarkerStyle(20);
-    h_lepPhi.SetMarkerStyle(20);
-    h_AK8Pt.SetMarkerStyle(20);
-    h_AK8Eta.SetMarkerStyle(20);
-    h_AK8Phi.SetMarkerStyle(20);
-    h_AK4Pt.SetMarkerStyle(20);
-    h_AK4Eta.SetMarkerStyle(20);
-    h_AK4Phi.SetMarkerStyle(20);
-    h_AK4M.SetMarkerStyle(20);
-    h_AK4BDisc.SetMarkerStyle(20);
+    h_lepPtdata.SetMarkerStyle(20);
+    h_lepEtadata.SetMarkerStyle(20);
+    h_lepPhidata.SetMarkerStyle(20);
+    h_AK8Ptdata.SetMarkerStyle(20);
+    h_AK8Etadata.SetMarkerStyle(20);
+    h_AK8Phidata.SetMarkerStyle(20);
+    h_AK4Ptdata.SetMarkerStyle(20);
+    h_AK4Etadata.SetMarkerStyle(20);
+    h_AK4Phidata.SetMarkerStyle(20);
+    h_AK4Mdata.SetMarkerStyle(20);
+    h_AK4BDiscdata.SetMarkerStyle(20);
 
     # Set color for this process
-    h_lepPt.SetMarkerColor(color);
-    h_lepEta.SetMarkerColor(color);
-    h_lepPhi.SetMarkerColor(color);
-    h_AK8Pt.SetMarkerColor(color);
-    h_AK8Eta.SetMarkerColor(color);
-    h_AK8Phi.SetMarkerColor(color);
-    h_AK4Pt.SetMarkerColor(color);
-    h_AK4Eta.SetMarkerColor(color);
-    h_AK4Phi.SetMarkerColor(color);
-    h_AK4M.SetMarkerColor(color);
-    h_AK4BDisc.SetMarkerColor(color);
+    h_lepPtdata.SetMarkerColor(color);
+    h_lepEtadata.SetMarkerColor(color);
+    h_lepPhidata.SetMarkerColor(color);
+    h_AK8Ptdata.SetMarkerColor(color);
+    h_AK8Etadata.SetMarkerColor(color);
+    h_AK8Phidata.SetMarkerColor(color);
+    h_AK4Ptdata.SetMarkerColor(color);
+    h_AK4Etadata.SetMarkerColor(color);
+    h_AK4Phidata.SetMarkerColor(color);
+    h_AK4Mdata.SetMarkerColor(color);
+    h_AK4BDiscdata.SetMarkerColor(color);
 
-    h_lepPt.SetLineColor(color);
-    h_lepEta.SetLineColor(color);
-    h_lepPhi.SetLineColor(color);
-    h_AK8Pt.SetLineColor(color);
-    h_AK8Eta.SetLineColor(color);
-    h_AK8Phi.SetLineColor(color);
-    h_AK4Pt.SetLineColor(color);
-    h_AK4Eta.SetLineColor(color);
-    h_AK4Phi.SetLineColor(color);
-    h_AK4M.SetLineColor(color);
-    h_AK4BDisc.SetLineColor(color);
+    h_lepPtdata.SetLineColor(color);
+    h_lepEtadata.SetLineColor(color);
+    h_lepPhidata.SetLineColor(color);
+    h_AK8Ptdata.SetLineColor(color);
+    h_AK8Etadata.SetLineColor(color);
+    h_AK8Phidata.SetLineColor(color);
+    h_AK4Ptdata.SetLineColor(color);
+    h_AK4Etadata.SetLineColor(color);
+    h_AK4Phidata.SetLineColor(color);
+    h_AK4Mdata.SetLineColor(color);
+    h_AK4BDiscdata.SetLineColor(color);
 
-    h_lepPt.SetMarkerSize(0.7);
-    h_lepEta.SetMarkerSize(0.7);
-    h_lepPhi.SetMarkerSize(0.7);
-    h_AK8Pt.SetMarkerSize(0.7);
-    h_AK8Eta.SetMarkerSize(0.7);
-    h_AK8Phi.SetMarkerSize(0.7);
-    h_AK4Pt.SetMarkerSize(0.7);
-    h_AK4Eta.SetMarkerSize(0.7);
-    h_AK4Phi.SetMarkerSize(0.7);
-    h_AK4M.SetMarkerSize(0.7);
-    h_AK4BDisc.SetMarkerSize(0.7);
+    h_lepPtdata.SetMarkerSize(0.7);
+    h_lepEtadata.SetMarkerSize(0.7);
+    h_lepPhidata.SetMarkerSize(0.7);
+    h_AK8Ptdata.SetMarkerSize(0.7);
+    h_AK8Etadata.SetMarkerSize(0.7);
+    h_AK8Phidata.SetMarkerSize(0.7);
+    h_AK4Ptdata.SetMarkerSize(0.7);
+    h_AK4Etadata.SetMarkerSize(0.7);
+    h_AK4Phidata.SetMarkerSize(0.7);
+    h_AK4Mdata.SetMarkerSize(0.7);
+    h_AK4BDiscdata.SetMarkerSize(0.7);
 
-    # Filling stacks
-#    stack_lepPt.Add(copy.deepcopy(h_lepPt));
-#    stack_lepEta.Add(copy.deepcopy(h_lepEta));
-#    stack_lepPhi.Add(copy.deepcopy(h_lepPhi));
-#    stack_AK8Pt.Add(copy.deepcopy(h_AK8Pt));
-#    stack_AK8Eta.Add(copy.deepcopy(h_AK8Eta));
-#    stack_AK8Phi.Add(copy.deepcopy(h_AK8Phi));
-#    stack_AK4Pt.Add(copy.deepcopy(h_AK4Pt));
-#    stack_AK4Eta.Add(copy.deepcopy(h_AK4Eta));
-#    stack_AK4Phi.Add(copy.deepcopy(h_AK4Phi));
-#    stack_AK4M.Add(copy.deepcopy(h_AK4M));
-#    stack_AK4BDisc.Add(copy.deepcopy(h_AK4BDisc));
-
-    cs1.cd(1);
-    h_lepPt.Draw("PESAME");
-    cs1.cd(2);
-    h_lepEta.Draw("SAMEPE");
-    cs1.cd(3);
-    h_lepPhi.Draw("SAMEPE");
-    cs1.cd(4);
-    h_AK8Pt.Draw("SAMEPE");
+    #Draw
+    #cs1.cd(1);
+    #h_lepPt.Draw("PESAME");
+    #cs1.cd(2);
+    #h_lepEta.Draw("SAMEPE");
+    #cs1.cd(3);
+    #h_lepPhi.Draw("SAMEPE");
+    #cs1.cd(4);
+    #h_AK8Pt.Draw("SAMEPE");
     
-    cs2.cd(1);
-    h_AK8Eta.Draw("SAMEPE");
-    cs2.cd(2);
-    h_AK8Phi.Draw("SAMEPE");
-    cs2.cd(3);
-    h_AK4Pt.Draw("SAMEPE");
-    cs2.cd(4);
-    h_AK4Eta.Draw("SAMEPE");
+    #cs2.cd(1);
+    #h_AK8Eta.Draw("SAMEPE");
+    #cs2.cd(2);
+    #h_AK8Phi.Draw("SAMEPE");
+    #cs2.cd(3);
+    #h_AK4Pt.Draw("SAMEPE");
+    #cs2.cd(4);
+    #h_AK4Eta.Draw("SAMEPE");
     
-    cs3.cd(1);
-    h_AK4Phi.Draw("SAMEPE");
-    cs3.cd(2);
-    h_AK4M.Draw("SAMEPE");
-    cs3.cd(3);
-    h_AK4BDisc.Draw("SAMEPE");
+    #cs3.cd(1);
+    #h_AK4Phi.Draw("SAMEPE");
+    #cs3.cd(2);
+    #h_AK4M.Draw("SAMEPE");
+    #cs3.cd(3);
+    #h_AK4BDisc.Draw("SAMEPE");
     
 # Output file
 outfilename = outname+"_stacked.root"
 outfile = ROOT.TFile(outfilename, "RECREATE");
+
+#Plotting and Ratio Plot
+#Define Canvases and Pads
+stack_list = [stack_lepPt,
+    stack_lepEta,
+    stack_lepPhi,
+    stack_AK8Pt,
+    stack_AK8Eta,
+    stack_AK8Phi,
+    stack_AK4Pt,
+    stack_AK4Eta,
+    stack_AK4Phi,
+    stack_AK4M,
+    stack_AK4BDisc]
+data_list  = [h_lepPtdata,
+    h_lepEtadata,
+    h_lepPhidata,
+    h_AK8Ptdata,
+    h_AK8Etadata,
+    h_AK8Phidata,
+    h_AK4Ptdata,
+    h_AK4Etadata,
+    h_AK4Phidata,
+    h_AK4Mdata,
+    h_AK4BDiscdata]
+
+cs1 = ROOT.TCanvas("cs1","cs1",400,500)
+pad1 = ROOT.TPad("pad1","pad1",0,0.35,1.0,1.0)
+if options.log :
+    pad1.SetLogy();
+pad1.Draw()
+pad2 = ROOT.TPad("pad1","pad2",0,0,1.0,0.35)
+pad2.Draw()
+
+count = 0
+for stack in stack_list:
+    #Plot Stacked with Data
+    pad1.cd()
+    stack.Draw()
+    h_data = copy.deepcopy(data_list[count])
+    print data_list[count]
+    count += 1
+    h_data.Draw("SAMEPE")
+    cs1.Update()
+
+    #Make and Plot Ratio
+    pad2.cd()
+    h_ratio = stack.GetHistogram()
+    for hist in stack.GetHists():
+        h_ratio.Add(hist)
+    h_data.Sumw2()
+    h_ratio.Sumw2()
+    h_data.Divide(h_data, h_ratio, 1, 1, "B")
+    h_data.SetStats(ROOT.kFALSE)
+    h_data.Draw("PE")
+    #h_ratio.Draw("PE")
+    cs1.Update()
 
 # Save stacks to output file
 #outfile.Write(stack_lepPt);
@@ -410,7 +461,7 @@ outfile = ROOT.TFile(outfilename, "RECREATE");
 #outfile.Write(stack_AK4BDisc);
 
 #stack_AK4BDisc.Write();
-cs1.Write();
-cs2.Write();
-cs3.Write();
+    cs1.Write(str(stack));
+#cs2.Write();
+#cs3.Write();
 file.Close();
