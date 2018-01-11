@@ -80,8 +80,8 @@ def plot_mttbar(argv) :
     if options.jer == 'down' :
 	    histogramSuffix += '_jer_Down'
 
-    fpileup = ROOT.TFile.Open('purw.root', 'read')
-    h_pileupWeight = fpileup.Get('pileup') 
+    #fpileup = ROOT.TFile.Open('purw.root', 'read')
+    #h_pileupWeight = fpileup.Get('pileup') 
 
     fout= ROOT.TFile(options.file_out, "RECREATE")
     fout.cd()
@@ -124,9 +124,15 @@ def plot_mttbar(argv) :
     # vertex info
     h_nvertex = ROOT.TH1F("h_nvertex"+histogramSuffix,"Nvertices;nvertex;Number", 100, 0.0, 100)
 
-#    h_dPhiLepAK8 = ROOT.TH1F("h_dPhiLepAK8"+histogramSuffix,";#Delta#phi_{l,AK8};Number", 100, 0.0, 1.0) #Not actually filled in any of the ntuples
 
-    #Following lines is to make sure that the statistical errors are kept and stored
+    # More histograms that show large discrepencies between signal (rsg_3000) and bkgd (ttbar_ALL)
+    h_AK8E			= ROOT.TH1F("h_AK8E"+histogramSuffix, ";AK8_{E} (GeV);Number", 300, 0.0, 5000)
+    h_AK8bDiscB		= ROOT.TH1F("h_AK8bDiscB"+histogramSuffix, ";AK8_{b_{disc,b}} (GeV);Number", 100, 0.0, 1.0)
+    h_AK8bDiscW		= ROOT.TH1F("h_AK8bDiscW"+histogramSuffix, ";AK8_{b_{disc,W}} (GeV);Number", 100, 0.0, 1.0)
+    h_AK8sj_bm		= ROOT.TH1F("h_AK8sj_bm"+histogramSuffix, ";AK8_{subjet, m_{b}} (GeV);Number", 100, 0.0, 100.00)
+    h_AK8sj_Wm		= ROOT.TH1F("h_AK8sj_Wm"+histogramSuffix, ";AK8_{subjet, m_{W}} (GeV);Number", 100, 0.0, 300.00)
+	
+	#Following lines is to make sure that the statistical errors are kept and stored
     h_mttbar.Sumw2()
     h_mtopHad.Sumw2()
     h_mtopHadGroomed.Sumw2()
@@ -145,6 +151,14 @@ def plot_mttbar(argv) :
     h_AK4Bdisc.Sumw2()
     h_drAK4AK8.Sumw2()
     h_drLepAK4.Sumw2()
+<<<<<<< HEAD
+    h_AK8E.Sumw2()
+    h_AK8bDiscB.Sumw2()
+    h_AK8bDiscW.Sumw2()
+    h_AK8sj_bm.Sumw2()
+    h_AK8sj_Wm.Sumw2()
+    
+=======
     h_dPhiLepAK8.Sumw2()
     h_nvertex.Sumw2()
 
@@ -165,6 +179,7 @@ def plot_mttbar(argv) :
         mttbar = ttbarCand.M()
         return mttbar
 
+>>>>>>> 192847445957fb2cdc8b0b019adbf0547b73ef68
     fin = ROOT.TFile.Open(options.file_in)
 
     trees = [ fin.Get("TreeSemiLept") ]
@@ -262,7 +277,7 @@ def plot_mttbar(argv) :
         t.SetBranchAddress('SemiLepMETpt'        , SemiLepMETpt        )
         t.SetBranchAddress('SemiLepMETphi'       , SemiLepMETphi       )
         t.SetBranchAddress('SemiLepNvtx'         , SemiLepNvtx         )
-        t.SetBranchAddress('FatJetDeltaPhiLep'      , FatJetDeltaPhiLep      )
+        t.SetBranchAddress('FatJetDeltaPhiLep'   , FatJetDeltaPhiLep   )
         t.SetBranchAddress('NearestAK4JetBDisc'            ,NearestAK4JetBDisc             )
         t.SetBranchAddress('NearestAK4JetPt'     ,NearestAK4JetPt      )
         t.SetBranchAddress('NearestAK4JetEta'    ,NearestAK4JetEta     )
@@ -285,10 +300,16 @@ def plot_mttbar(argv) :
         t.SetBranchStatus ('FatJetPt', 1)
         t.SetBranchStatus ('FatJetEta', 1)
         t.SetBranchStatus ('FatJetPhi', 1)
+        t.SetBranchStatus ('FatJetSDBDiscB', 1)
+        t.SetBranchStatus ('FatJetSDBDiscW', 1)
         t.SetBranchStatus ('FatJetMass', 1)
+        t.SetBranchStatus ('FatJetEnergy', 1)
         t.SetBranchStatus ('FatJetMassSoftDrop', 1)
         t.SetBranchStatus ('FatJetTau32', 1)
         t.SetBranchStatus ('FatJetTau21', 1)
+        t.SetBranchStatus ('FatJetDeltaPhiLep', 1)
+        t.SetBranchStatus ('FatJetSDsubjetBmass', 1)
+        t.SetBranchStatus ('FatJetSDsubjetWmass', 1)
         t.SetBranchStatus ('SemiLeptTrig', 1)
         t.SetBranchStatus ('NearestAK4JetBDisc', 1)
         t.SetBranchStatus ('NearestAK4JetPt'   ,1 )
@@ -383,8 +404,8 @@ def plot_mttbar(argv) :
             
             #preselection histos            
             h_AK4BdiscPreSel.Fill( NearestAK4JetBDisc[0], weight )
-            h_AK8Tau32PreSel.Fill(FatJetTau32[0], weight )
-            h_AK8Tau21PreSel.Fill(FatJetTau21[0], weight )
+            h_AK8Tau32PreSel.Fill( FatJetTau32[0], weight )
+            h_AK8Tau21PreSel.Fill( FatJetTau21[0], weight )
 
             passKin = hadTopCandP4.Perp() > 100.
             passTopTag = tau32 < 0.8 and mass_sd > 110. and mass_sd < 250.
@@ -458,6 +479,12 @@ def plot_mttbar(argv) :
             h_AK8Tau32.Fill(FatJetTau32[0], weight )
             h_AK8Tau21.Fill(FatJetTau21[0], weight )
 
+            #h_dPhiLepAK8.Fill(FatJetDeltaPhiLep[0], weight )
+            h_AK8E.Fill( FatJetEnergy[0], weight )
+            h_AK8bDiscB.Fill( FatJetSDBDiscB[0], weight )
+            h_AK8bDiscW.Fill( FatJetSDBDiscW[0], weight )
+            h_AK8sj_bm.Fill( FatJetSDsubjetBmass[0], weight )
+            h_AK8sj_Wm.Fill( FatJetSDsubjetWmass[0], weight )
             h_dPhiLepAK8.Fill(FatJetDeltaPhiLep[0], weight )
             
             h_nvertex.Fill(SemiLepNvtx[0],weight )
