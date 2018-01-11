@@ -88,6 +88,7 @@ def plot_mttbar(argv) :
     h_cuts = ROOT.TH1F("Cut_flow", "", 4,0,4)
 
     h_mttbar = ROOT.TH1F("h_mttbar"+histogramSuffix, ";m_{t#bar{t}} (GeV);Number", 100, 0, 5000)#invariant ttbar mass
+    h_mttbar_control = ROOT.TH1F("h_mttbar_control"+histogramSuffix, ";m_{t#bar{t}} (GeV);Number", 100, 0, 5000)#invariant ttbar mass
     h_mtopHad = ROOT.TH1F("h_mtopHad"+histogramSuffix, ";m_{jet} (GeV);Number", 100, 0, 400)
     h_mtopHadGroomed = ROOT.TH1F("h_mtopHadGroomed"+histogramSuffix, ";Groomed m_{jet} (GeV);Number", 100, 0, 400)
 
@@ -102,7 +103,9 @@ def plot_mttbar(argv) :
     h_AK8Eta = ROOT.TH1F("h_AK8Eta"+histogramSuffix, ";AK8_{#eta} ;Number", 100, -2.5, 2.5)
     h_AK8Phi = ROOT.TH1F("h_AK8Phi"+histogramSuffix, ";AK8_{#phi} ;Number", 100, -3.5, 3.5)
     h_AK8Tau32 = ROOT.TH1F("h_AK8Tau32"+histogramSuffix,";AK8_{#tau_{32}};Number", 50, 0.0, 1.0)
+    h_AK8Tau32PreSel = ROOT.TH1F("h_AK8Tau32PreSel"+histogramSuffix,";AK8_{#tau_{32}};Number", 50, 0.0, 1.0)
     h_AK8Tau21 = ROOT.TH1F("h_AK8Tau21"+histogramSuffix,";AK8_{#tau_{21}};Number", 50, 0.0, 1.0)
+    h_AK8Tau21PreSel = ROOT.TH1F("h_AK8Tau21PreSel"+histogramSuffix,";AK8_{#tau_{21}};Number", 50, 0.0, 1.0)
     
 	#AK8
     h_AK4Pt    = ROOT.TH1F("h_AK4Pt"+histogramSuffix,";ak4jet_{pT} (GeV);Number", 100, 0, 1500)
@@ -110,14 +113,41 @@ def plot_mttbar(argv) :
     h_AK4Phi   = ROOT.TH1F("h_AK4Phi"+histogramSuffix,";ak4jet_{#phi};Number", 100, -3.5, 3.5)
     h_AK4M     = ROOT.TH1F("h_AK4M"+histogramSuffix,";ak4jet_{mass};Number", 100, 0, 400)
     h_AK4Bdisc = ROOT.TH1F("h_AK4Bdisc"+histogramSuffix,";ak4jet_{bdisc};Number", 100, 0, 1.0)
+    h_AK4BdiscPreSel = ROOT.TH1F("h_AK4BdiscPreSel"+histogramSuffix,";ak4jet_{bdisc};Number", 100, 0, 1.0)
+
 
     h_drAK4AK8    = ROOT.TH1F("h_drAK4AK8"+histogramSuffix,";#DeltaR_{AK4, AK8} ;Number", 100, 0, 5)
 #    h_drLepAK8    = ROOT.TH1F("h_drLepAK8",";{#delta r}_{lep, AK8} ;Number", 100, 0, 1500)
     h_drLepAK4    = ROOT.TH1F("h_drLepAK4"+histogramSuffix,";#DeltaR_{lep, AK4} ;Number", 100, 0, 5)
+
     h_dPhiLepAK8 = ROOT.TH1F("h_dPhiLepAK8"+histogramSuffix,";#Delta#phi_{l,AK8};Number", 100, 0.0, 1.0)
     # vertex info
     h_nvertex = ROOT.TH1F("h_nvertex"+histogramSuffix,"Nvertices;nvertex;Number", 100, 0.0, 100)
-    
+
+#    h_dPhiLepAK8 = ROOT.TH1F("h_dPhiLepAK8"+histogramSuffix,";#Delta#phi_{l,AK8};Number", 100, 0.0, 1.0) #Not actually filled in any of the ntuples
+
+    #Following lines is to make sure that the statistical errors are kept and stored
+    h_mttbar.Sumw2()
+    h_mtopHad.Sumw2()
+    h_mtopHadGroomed.Sumw2()
+    h_lepPt.Sumw2()
+    h_lepEta.Sumw2()
+    h_lepPhi.Sumw2()
+    h_AK8Pt.Sumw2()
+    h_AK8Eta.Sumw2()
+    h_AK8Phi.Sumw2()
+    h_AK8Tau32.Sumw2()
+    h_AK8Tau21.Sumw2()
+    h_AK4Pt.Sumw2()
+    h_AK4Eta.Sumw2()
+    h_AK4Phi.Sumw2()
+    h_AK4M.Sumw2()
+    h_AK4Bdisc.Sumw2()
+    h_drAK4AK8.Sumw2()
+    h_drLepAK4.Sumw2()
+    h_dPhiLepAK8.Sumw2()
+    h_nvertex.Sumw2()
+
     fin = ROOT.TFile.Open(options.file_in)
 
     trees = [ fin.Get("TreeSemiLept") ]
@@ -336,14 +366,31 @@ def plot_mttbar(argv) :
             #print weight
             
             #preselection histos            
-            #h_AK4BdiscPreSel.Fill( NearestAK4JetBDisc[0], weight )
-            #h_AK8Tau32PreSel.Fill(FatJetTau32[0], weight )
-            #h_AK8Tau21PreSel.Fill(FatJetTau21[0], weight )
+            h_AK4BdiscPreSel.Fill( NearestAK4JetBDisc[0], weight )
+            h_AK8Tau32PreSel.Fill(FatJetTau32[0], weight )
+            h_AK8Tau21PreSel.Fill(FatJetTau21[0], weight )
 
             passKin = hadTopCandP4.Perp() > 100.
             passTopTag = tau32 < 0.8 and mass_sd > 110. and mass_sd < 250.
             pass2DCut = LeptonPtRel[0] > 20. or LeptonDRMin[0] > 0.4
             passBtag = bdisc > 0.7
+
+            # Invariant mass calculation
+            def calculate_m():
+                lepTopCandP4 = None
+                # Get the z-component of the lepton from the W mass constraint
+                solution, nuz1, nuz2 = solve_nu( vlep=theLepton, vnu=nuCandP4 )
+                # If there is at least one real solution, pick it up
+                if solution :
+                    nuCandP4.SetPz( nuz1 )
+                else :
+                    nuCandP4.SetPz( nuz1.real )
+
+                lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
+
+                ttbarCand = hadTopCandP4 + lepTopCandP4
+                mttbar = ttbarCand.M()
+                return mttbar
 
             # Applying and counting cuts
             if not passKin: 
@@ -355,6 +402,12 @@ def plot_mttbar(argv) :
             else:
                 cut2 +=1
             if not passBtag: 
+                # Fill control region
+                if not passTopTag: 
+                    continue 
+                else:
+                    mttbar = calculate_m()
+                    h_mttbar_control.Fill( mttbar, weight )
                 continue                
             else:
                 cut3 +=1
@@ -374,25 +427,11 @@ def plot_mttbar(argv) :
             # Now we do our kinematic calculation based on the categories of the
             # number of top and bottom tags
             mttbar = -1.0
-
-
-            lepTopCandP4 = None
-            # Get the z-component of the lepton from the W mass constraint
-            solution, nuz1, nuz2 = solve_nu( vlep=theLepton, vnu=nuCandP4 )
-            # If there is at least one real solution, pick it up
-            if solution :
-                nuCandP4.SetPz( nuz1 )
-            else :
-                nuCandP4.SetPz( nuz1.real )
-
-            lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
-
-            ttbarCand = hadTopCandP4 + lepTopCandP4
-            mttbar = ttbarCand.M()
-			
+            mttbar = calculate_m()
 
             # Filling plots 
             if options.isData: weight =1
+
             count +=1
             h_mttbar.Fill( mttbar, weight )
             h_mtopHadGroomed.Fill( mass_sd, weight )
@@ -415,15 +454,14 @@ def plot_mttbar(argv) :
             h_AK4Bdisc.Fill( NearestAK4JetBDisc[0], weight )
       
             #dr's
-            h_drAK4AK8.Fill(bJetCandP4.DeltaR(bJetCandP4), weight)
-            h_drLepAK4.Fill(theLepton.DeltaR(hadTopCandP4), weight)
+            h_drAK4AK8.Fill(bJetCandP4.DeltaR(hadTopCandP4), weight)
+            h_drLepAK4.Fill(theLepton.DeltaR(bJetCandP4), weight)
             h_AK8Tau32.Fill(FatJetTau32[0], weight )
             h_AK8Tau21.Fill(FatJetTau21[0], weight )
 
-
             h_dPhiLepAK8.Fill(FatJetDeltaPhiLep[0], weight )
             
-            h_nvertex.Fill(SemiLepNvtx[0],weight)
+            h_nvertex.Fill(SemiLepNvtx[0],weight )
 
     # Fill cut-flow
     h_cuts.SetBinContent(1, cut1)
@@ -434,7 +472,6 @@ def plot_mttbar(argv) :
     h_cuts.GetXaxis().SetBinLabel(2, "pass2DCut" )
     h_cuts.GetXaxis().SetBinLabel(3, "passBtag")
     h_cuts.GetXaxis().SetBinLabel(4, "passTopTag")
-
 
     print options.file_out, " : ", count, "/", tot_entries, ", Percentage:", round(float(count)/(float(tot_entries+1))*100,3), "%", \
      "Cut_flow: [", cut1, cut2, cut3, cut4, "]"
