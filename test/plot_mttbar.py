@@ -39,6 +39,10 @@ def plot_mttbar(argv) :
 					  default='mu',
                       help='Choice of lepton (mu or ele)')
 					  
+    parser.add_option('--sig', action='store_true',
+	                  dest='isSignal',
+					  default=False,
+                      help='Choice of signal or background (True or False)')
     parser.add_option('--isData', action='store_true',
                       dest='isData',
                       default = False,
@@ -427,14 +431,16 @@ def plot_mttbar(argv) :
     h_cuts.GetXaxis().SetBinLabel(2, "pass2DCut" )
     h_cuts.GetXaxis().SetBinLabel(3, "passBtag")
     h_cuts.GetXaxis().SetBinLabel(4, "passTopTag")
-
+    
+    if options.isSignal:
+    	print "this is signal"
 
     print options.file_out, " : ", count, "/", tot_entries, ", Percentage:", round(float(count)/(float(tot_entries+1))*100,3), "%", \
      "Cut_flow: [", cut1, cut2, cut3, cut4, "]"
 
     nm = str(count)
     fh.write(options.file_in)
-    fh.write("  "+ nm[-2:])
+    fh.write("  "+ nm)
     fh.write('\n')
     fh.close
 
