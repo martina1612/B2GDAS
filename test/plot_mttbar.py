@@ -52,7 +52,7 @@ def plot_mttbar(argv) :
     argv = []
 
     #write to temp file
-    #fh = open("num.txt", "a")
+    fh = open("num.txt", "a")
 
     #print '===== Command line options ====='
     #print options
@@ -107,12 +107,8 @@ def plot_mttbar(argv) :
     h_AK8Eta = ROOT.TH1F("h_AK8Eta"+histogramSuffix, ";AK8_{#eta} ;Number", 100, -2.5, 2.5)
     h_AK8Phi = ROOT.TH1F("h_AK8Phi"+histogramSuffix, ";AK8_{#phi} ;Number", 100, -3.5, 3.5)
     h_AK8Tau32 = ROOT.TH1F("h_AK8Tau32"+histogramSuffix,";AK8_{#tau_{32}};Number", 50, 0.0, 1.0)
-    h_AK8Tau32PreSel = ROOT.TH1F("h_AK8Tau32PreSel"+histogramSuffix,";AK8_{#tau_{32}};Number", 50, 0.0, 1.0)
     h_AK8Tau21 = ROOT.TH1F("h_AK8Tau21"+histogramSuffix,";AK8_{#tau_{21}};Number", 50, 0.0, 1.0)
-<<<<<<< HEAD
     h_AK8Tau32PreSel = ROOT.TH1F("h_AK8Tau32PreSel"+histogramSuffix,";AK8_{#tau_{32}};Number", 50, 0.0, 1.0)
-=======
->>>>>>> 68a1a9c7ce42325069654f16f1d0b2e4598c5924
     h_AK8Tau21PreSel = ROOT.TH1F("h_AK8Tau21PreSel"+histogramSuffix,";AK8_{#tau_{21}};Number", 50, 0.0, 1.0)
     
 	#AK8
@@ -122,10 +118,6 @@ def plot_mttbar(argv) :
     h_AK4M     = ROOT.TH1F("h_AK4M"+histogramSuffix,";ak4jet_{mass};Number", 100, 0, 400)
     h_AK4Bdisc = ROOT.TH1F("h_AK4Bdisc"+histogramSuffix,";ak4jet_{bdisc};Number", 100, 0, 1.0)
     h_AK4BdiscPreSel = ROOT.TH1F("h_AK4BdiscPreSel"+histogramSuffix,";ak4jet_{bdisc};Number", 100, 0, 1.0)
-<<<<<<< HEAD
-=======
-
->>>>>>> 68a1a9c7ce42325069654f16f1d0b2e4598c5924
 
     h_drAK4AK8    = ROOT.TH1F("h_drAK4AK8"+histogramSuffix,";#DeltaR_{AK4, AK8} ;Number", 100, 0, 5)
 #    h_drLepAK8    = ROOT.TH1F("h_drLepAK8",";{#delta r}_{lep, AK8} ;Number", 100, 0, 1500)
@@ -158,6 +150,14 @@ def plot_mttbar(argv) :
 
     tot_entries, count = 0, 0
     cut1, cut2, cut3, cut4 = 0 ,0 ,0 ,0
+    tau32_cut = 0.8 
+    mass_sdHigh = 250.
+    mass_sdLow  = 110.
+    LeptonPtRel_cut = 20.
+    bdisc_cut = 0.7
+    LeptonDRMin_cut = 0.4
+    hadTopCandP4Perp_cut = 100.
+
 
     for itree,t in enumerate(trees) :
 
@@ -374,10 +374,10 @@ def plot_mttbar(argv) :
             h_AK8Tau32PreSel.Fill(FatJetTau32[0], weight )
             h_AK8Tau21PreSel.Fill(FatJetTau21[0], weight )
 
-            passKin = hadTopCandP4.Perp() > 100.
-            passTopTag = tau32 < 0.8 and mass_sd > 110. and mass_sd < 250.
-            pass2DCut = LeptonPtRel[0] > 20. or LeptonDRMin[0] > 0.4
-            passBtag = bdisc > 0.7
+            passKin = hadTopCandP4.Perp() > hadTopCandP4Perp_cut
+            passTopTag = tau32 < tau32_cut and mass_sd > mass_sdLow  and mass_sd < mass_sdHigh
+            pass2DCut = LeptonPtRel[0] > LeptonPtRel_cut or LeptonDRMin[0] > LeptonDRMin_cut
+            passBtag = bdisc > bdisc_cut
 
             # Invariant mass calculation
             def calculate_m():
@@ -479,9 +479,10 @@ def plot_mttbar(argv) :
     print options.file_out, " : ", count, "/", tot_entries, ", Percentage:", round(float(count)/(float(tot_entries+1))*100,3), "%", \
      "Cut_flow: [", cut1, cut2, cut3, cut4, "]"
 
-    nm = str(count)
+    nm = options.file_in
+    #fh.write(nm[71:])
     fh.write(options.file_in)
-    fh.write("  "+ nm)
+    fh.write(" "+str(count)+" "+str(tau32_cut)+" "+str(mass_sdLow)+" "+str(mass_sdHigh)+" "+str(LeptonPtRel_cut)+" "+str(LeptonDRMin_cut)+" "+str(hadTopCandP4Perp_cut)+" "+str(bdisc_cut))
     fh.write('\n')
     fh.close
     #fh.write(options.file_in)
