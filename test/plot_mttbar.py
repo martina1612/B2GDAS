@@ -367,7 +367,7 @@ def plot_mttbar(argv) :
             #Weights
             pileupWeight=  h_pileupWeight.GetBinContent(SemiLepNvtx[0]+1)
             weight = pileupWeight
-            if options.isData: weight =1
+            if options.isData: weight = 1
             if options.jec =='up':
                 hadTopCandP4 *= FatJetJECUpSys[0]
                 bJetCandP4 *= NearestAK4JetJECUpSys[0]
@@ -472,9 +472,9 @@ def plot_mttbar(argv) :
     h_cuts.GetXaxis().SetBinLabel(3, "passBtag")
     h_cuts.GetXaxis().SetBinLabel(4, "passTopTag")
 
-    control_eff = float(eff_pass)/float(tot_entries)
+    control_pass = float(eff_pass)#/float(tot_entries)
     print options.file_out, " : ", count, "/", tot_entries, ", Percentage:", round(float(count)/(float(tot_entries+1))*100,3), "%", \
-     "Cut_flow: [", cut1, cut2, cut3, cut4, "]", " Control Efficiency:", control_eff
+     "Cut_flow: [", cut1, cut2, cut3, cut4, "]", " Control Efficiency:", control_pass
 
     #fh.write(options.file_in)
     #fh.close
@@ -483,7 +483,7 @@ def plot_mttbar(argv) :
     fout.Write()
     fout.Close()
     
-    return control_eff
+    return control_pass
 
 if __name__ == "__main__" :
     control_eff = plot_mttbar(sys.argv)

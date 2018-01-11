@@ -105,8 +105,8 @@ def inputs(outnames, files=run_all, dir_name="root_files", corrs=False):
 if __name__ == "__main__" :
 	path = "/store/user/cmsdas/2018/long_exercises/B2GTTbar/"
 	run_all, outnames = names(path)
-	ins = inputs(outnames, files=signal, corrs=False)
+	ins = inputs(outnames, files=ttbar, corrs=False)
 	# Run in parallel
 	from multiprocessing import Pool
 	p = Pool(15)
-	control_effs = (p.map(plot_mttbar, ins))
+	control_passs = (p.map(plot_mttbar, ins))
