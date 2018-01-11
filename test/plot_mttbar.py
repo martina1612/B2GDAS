@@ -37,17 +37,22 @@ def plot_mttbar(argv) :
     parser.add_option('--jer', type='string', action='store',
                       dest='jer',
                       default = None,
-                      help='Choice of up and down for Jet Energy Resolution (only set jer or jec')
+                      help='Choice of up and down for Jet Energy Resolution (only set jer or jec or sf')
 
     parser.add_option('--jec', type='string', action='store',
                       dest='jec',
                       default = None,
-                      help='Choice of up and down for Jet Energy Correction (only set jer or jec')
+                      help='Choice of up and down for Jet Energy Correction (only set jer or jec or sf')
+
+    parser.add_option('--sf', type='string', action='store',
+                      dest='sf',
+                      default = None,
+                      help='Choice of up and down for scale factor (Only set jer or jec or sf')
     
     parser.add_option('--lepton', type='string', action='store',
 	                  dest='lepton',
 					  default='mu',
-                      help='Choice of lepton (mu or ele)')
+                      help='Choice of lepton (mu or el)')
 					  
     parser.add_option('--sig', action='store_true',
 	                  dest='isSignal',
@@ -58,6 +63,11 @@ def plot_mttbar(argv) :
                       default = False,
                       help='Is this Data?')
         
+    parser.add_option('--pileup',type='string',  action='store',
+                      dest='pileup',
+                      default = None,
+                      help='Choice for pileup cros section shift')
+    
     (options, args) = parser.parse_args(argv)
     argv = []
     
@@ -74,7 +84,7 @@ def plot_mttbar(argv) :
 
     histogramSuffix = ''
     #Adding name change to histograms based on --jec options and --jer options
-    if options.lepton == 'ele':
+    if options.lepton == 'el':
         histogramSuffix = '_el'
     if options.lepton == 'mu':
         histogramSuffix = '_mu'
@@ -94,12 +104,31 @@ def plot_mttbar(argv) :
     if options.jer == 'down' :
 	    histogramSuffix += '_jer_Down'
 
-    fpileup = ROOT.TFile.Open('purw.root', 'read')
-    h_pileupWeight = fpileup.Get('pileup') 
+    if options.sf == 'up' :
+        histogramSuffix += '_sf_Up'
+
+    if options.sf == 'down' :
+        histogramSuffix += '_sf_Down'
+
+    if options.pileup == None:
+    	fpileup = ROOT.TFile.Open('purw.root', 'read')
+               
+    if options.pileup == "up":
+	    fpilup = ROOT.TFile.Open('purw_up.root','read')
+        histogramSuffix += '_pileup_Up'
+
+    if options.pileup == "down":
+	    fpileup = ROOT.TFile.Open('purw_down.root','read')
+        histogramSuffix += '_pileup_Down'
+    
+    h_pileupWeight = fpileup.Get('pileup')
+
+    if options.isSignal:
+        print "this is signal"
 
     fout= ROOT.TFile(options.file_out, "RECREATE")
     fout.cd()
-    h_cuts = ROOT.TH1F("Cut_flow", "", 4,0,4)
+    h_cuts = ROOT.TH1F("Cut_flow", "", 5,0,5)
 
     h_mttbar = ROOT.TH1F("h_mttbar"+histogramSuffix, ";m_{t#bar{t}} (GeV);Number", 100, 0, 5000)#invariant ttbar mass
     h_mttbar_control = ROOT.TH1F("h_mttbar_control"+histogramSuffix, ";m_{t#bar{t}} (GeV);Number", 100, 0, 5000)#invariant ttbar mass
@@ -369,7 +398,7 @@ def plot_mttbar(argv) :
                 if SemiLeptTrig[0] == 0  :
                     continue
 
-            if options.lepton=='ele' :
+            if options.lepton=='el' :
                 if LeptonType[0] != 11 :
                     continue
                 # Muon triggers only for now (use HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165 with index 1 and HLT_Ele115_CaloIdVT_GsfTrkIdT with index 2)
@@ -393,14 +422,19 @@ def plot_mttbar(argv) :
             bdisc = NearestAK4JetBDisc[0]
             
             #Weights
-            SF_el = 1.0725482106
-            SF_el_err = 0.008977194592
-            SF_mu = 1.30243946973
-            SF_mu_err = 0.0095834667743
-            pileupWeight=  h_pileupWeight.GetBinContent(SemiLepNvtx[0]+1)
-            weight = pileupWeight
-            if options.lepton =='mu': weight*SF_el
-            if options.lepton =='ele': weight*SF_mu
+            SF_el = 0.932359021363 #1.0725482106
+            SF_el_err = 0.00780381551305 #0.008977194592
+            SF_mu = 0.767789999645 #1.30243946973
+            SF_mu_err = 0.00564946788104 #0.0095834667743
+            weight=  h_pileupWeight.GetBinContent(SemiLepNvtx[0]+1)
+            
+            if options.lepton =='mu' and options.sf =='up': weight*(SF_mu+SF_mu_err)
+            if options.lepton =='el' and options.sf =='up': weight*(SF_el+SF_el_err)
+            if options.lepton =='mu' and options.sf =='down': weight*(SF_mu-SF_mu_err)
+            if options.lepton =='el' and options.sf =='down': weight*(SF_el-SF_el_err)
+            if options.lepton =='mu': weight*(SF_mu)
+            if options.lepton =='el': weight*(SF_el)
+
             if options.isData: weight = 1
             if options.jec =='up':
                 hadTopCandP4 *= FatJetJECUpSys[0]
@@ -503,17 +537,16 @@ def plot_mttbar(argv) :
             h_nvertex.Fill(SemiLepNvtx[0],weight )
 
     # Fill cut-flow
-    h_cuts.SetBinContent(1, cut1)
-    h_cuts.SetBinContent(2, cut2)
-    h_cuts.SetBinContent(3, cut3)
-    h_cuts.SetBinContent(4, cut4)
-    h_cuts.GetXaxis().SetBinLabel(1, "passKin")
-    h_cuts.GetXaxis().SetBinLabel(2, "pass2DCut" )
-    h_cuts.GetXaxis().SetBinLabel(3, "passBtag")
-    h_cuts.GetXaxis().SetBinLabel(4, "passTopTag")
-    
-    if options.isSignal:
-    	print "this is signal"
+    h_cuts.SetBinContent(1, tot_entries)
+    h_cuts.SetBinContent(2, cut1)
+    h_cuts.SetBinContent(3, cut2)
+    h_cuts.SetBinContent(4, cut3)
+    h_cuts.SetBinContent(5, cut4)
+    h_cuts.GetXaxis().SetBinLabel(1, "total")
+    h_cuts.GetXaxis().SetBinLabel(2, "passKin")
+    h_cuts.GetXaxis().SetBinLabel(3, "pass2DCut" )
+    h_cuts.GetXaxis().SetBinLabel(4, "passBtag")
+    h_cuts.GetXaxis().SetBinLabel(5, "passTopTag")
 
     control_pass = float(eff_pass)#/float(tot_entries)
     print options.file_out, " : ", count, "/", tot_entries, ", Percentage:", round(float(count)/(float(tot_entries+1))*100,3), "%", \
