@@ -12,6 +12,13 @@ import array as array
 from optparse import OptionParser
 import numpy as np
 
+tau32_cut = 0.8 
+mass_sdHigh = 250.
+mass_sdLow  = 110.
+LeptonPtRel_cut = 20.
+bdisc_cut = 0.7
+LeptonDRMin_cut = 0.4
+hadTopCandP4Perp_cut = 100.
 
 def plot_mttbar(argv) :
     parser = OptionParser()
@@ -150,14 +157,6 @@ def plot_mttbar(argv) :
 
     tot_entries, count = 0, 0
     cut1, cut2, cut3, cut4 = 0 ,0 ,0 ,0
-    tau32_cut = 0.8 
-    mass_sdHigh = 250.
-    mass_sdLow  = 110.
-    LeptonPtRel_cut = 20.
-    bdisc_cut = 0.7
-    LeptonDRMin_cut = 0.4
-    hadTopCandP4Perp_cut = 100.
-
 
     for itree,t in enumerate(trees) :
 
