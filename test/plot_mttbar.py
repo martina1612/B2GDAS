@@ -117,13 +117,10 @@ def plot_mttbar(argv) :
 
 
     h_drAK4AK8    = ROOT.TH1F("h_drAK4AK8"+histogramSuffix,";#DeltaR_{AK4, AK8} ;Number", 100, 0, 5)
-#    h_drLepAK8    = ROOT.TH1F("h_drLepAK8",";{#delta r}_{lep, AK8} ;Number", 100, 0, 1500)
     h_drLepAK4    = ROOT.TH1F("h_drLepAK4"+histogramSuffix,";#DeltaR_{lep, AK4} ;Number", 100, 0, 5)
-
     h_dPhiLepAK8 = ROOT.TH1F("h_dPhiLepAK8"+histogramSuffix,";#Delta#phi_{l,AK8};Number", 100, 0.0, 1.0)
     # vertex info
     h_nvertex = ROOT.TH1F("h_nvertex"+histogramSuffix,"Nvertices;nvertex;Number", 100, 0.0, 100)
-
 
     # More histograms that show large discrepencies between signal (rsg_3000) and bkgd (ttbar_ALL)
     h_AK8E			= ROOT.TH1F("h_AK8E"+histogramSuffix, ";AK8_{E} (GeV);Number", 300, 0.0, 5000)
@@ -156,7 +153,6 @@ def plot_mttbar(argv) :
     h_AK8bDiscW.Sumw2()
     h_AK8sj_bm.Sumw2()
     h_AK8sj_Wm.Sumw2()
-
     h_dPhiLepAK8.Sumw2()
     h_nvertex.Sumw2()
 
@@ -384,8 +380,14 @@ def plot_mttbar(argv) :
             bdisc = NearestAK4JetBDisc[0]
             
             #Weights
+            SF_el = 1.0725482106
+            SF_el_err = 0.008977194592
+            SF_mu = 1.30243946973
+            SF_mu_err = 0.0095834667743
             pileupWeight=  h_pileupWeight.GetBinContent(SemiLepNvtx[0]+1)
             weight = pileupWeight
+            if options.lepton =='mu': weight*SF_el
+            if options.lepton =='ele': weight*SF_mu
             if options.isData: weight = 1
             if options.jec =='up':
                 hadTopCandP4 *= FatJetJECUpSys[0]
