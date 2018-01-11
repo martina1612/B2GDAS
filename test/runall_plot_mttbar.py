@@ -15,7 +15,25 @@ import errno
 import os
 
 # Dictionaries
-filenames = {
+signal = {
+	'rsg' : [],
+}
+background = {
+	'QCD' : [],
+	'WJets' : [],
+	'ttbar' : [],
+	'singletop' : []
+}
+data = {
+	'singleMuon' : [],
+	'SingleElectron' : [],
+	}
+
+ttbar = {
+	'ttbar' : []
+}
+
+run_all = {
 	'QCD' : [],
 	'singleMuon' : [],
 	'SingleElectron' : [],
@@ -47,26 +65,28 @@ def make_dirs(dirname):
 
 # Extract file names
 def names(path):
-	for name in filenames.keys():
+	for name in run_all.keys():
 		files, outfiles = [], []
 		batcmd="xrdfs root://cmseos.fnal.gov ls -u " + path
 		temps = subprocess.check_output(batcmd, shell=True)
 		for file in temps.split("\n"):
 		    #print file.split("/")
 		    if file.split("/")[-1].startswith(name) :
-		        filenames[name].append(file)
+		        run_all[name].append(file)
 		        outnames[name].append(file.split("/")[-1][0:-5])
-	return filenames, outnames
+	return run_all, outnames
 
 # Compile function inputs
-def inputs(filenames, outnames, dir_name="root_files"):
+def inputs(outnames, files=run_all, dir_name="root_files", corrs=False):
 	ins = []
-	for corr in ["", "--jer", "--jec"]:
+	if corrs == True: corrs = ["", "--jer", "--jec"]
+	else: corrs = [""]
+	for corr in corrs:
 		for shape in ["up", "down"]:
 			for leptype in ['mu', 'ele']:
-				for typ in filenames.keys(): 
-					for i, n in enumerate(filenames[typ]):
-						in_file = filenames[typ][i]					
+				for typ in files.keys(): 
+					for i, n in enumerate(run_all[typ]):
+						in_file = run_all[typ][i]					
 						make_dirs(dir_name)
 						# Raw files
 						if corr == "" and shape=="up": 
@@ -84,9 +104,9 @@ def inputs(filenames, outnames, dir_name="root_files"):
 # Run
 if __name__ == "__main__" :
 	path = "/store/user/cmsdas/2018/long_exercises/B2GTTbar/"
-	filenames, outnames = names(path)
-	ins = inputs(filenames, outnames)
+	run_all, outnames = names(path)
+	ins = inputs(outnames, files=signal, corrs=False)
 	# Run in parallel
 	from multiprocessing import Pool
 	p = Pool(15)
-	p.map(plot_mttbar, ins)
+	control_effs = (p.map(plot_mttbar, ins))
