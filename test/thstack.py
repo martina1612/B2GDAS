@@ -17,12 +17,8 @@ parser.add_option('--isM', action='store_true',
 parser.add_option('--log', action='store_true',
                       dest='log',
                       default = False,help='Set log Y')
-#parser.add_option('--sig', action='store', dest='sig', type='int' ,
-#		      default = '0', help='Integer selects signal sample to plot')
 
 (options, args) = parser.parse_args()
-
-#sig = options.sig
 
 print ""
 
@@ -72,12 +68,6 @@ h_AK4Etadata  = ROOT.TH1F()
 h_AK4Phidata  = ROOT.TH1F()
 h_AK4Mdata    = ROOT.TH1F()
 h_AK4BDiscdata = ROOT.TH1F() 
-
-#if sig >= len(filelistdata) :
-#    print "--sig not valid. Choose one from 0 to %d." % (len(filelistdata)-1)
-#    exit()
-#else :
-#    filelistdata = [ filelistdata[sig] ]
 
 # Bkg Input files
 filelistbkg = [
@@ -137,7 +127,7 @@ for inp in filelistbkg:
     filelistbkg[i] = "inputfolder/CMSDAS/"+inp
     i += 1
 
-
+#Define the name of our saved file
 outname = "stacked_plots"+findMe
 
 skippedCount = 0
@@ -162,9 +152,7 @@ for filename  in filelistbkg:
 
     print "Reading %s" % filename
     color = decideColor(filename)
-#    print color
     file = ROOT.TFile(filename);
-#    print filename
     # Reading hists from file
     h_lepPt   = file.Get("h_lepPt");
     h_lepEta  = file.Get("h_lepEta");
@@ -231,56 +219,7 @@ for filename  in filelistbkg:
 
 print "\n%d background file(s) skipped.\n" % skippedCount
 
-# Create a canvas to print to
-#cs1 = ROOT.TCanvas("cs1","cs1",10,10,700,900);
-#T = ROOT.TText();
-#T.SetTextFont(42);
-#T.SetTextAlign(21);
-#cs1.Divide(2,2);
-
-#cs2 = ROOT.TCanvas("cs2","cs2",10,10,700,900);
-#T = ROOT.TText();
-#T.SetTextFont(42);
-#T.SetTextAlign(21);
-#cs2.Divide(2,2);
-
-#cs3 = ROOT.TCanvas("cs3","cs3",10,10,700,900);
-#T = ROOT.TText();
-#T.SetTextFont(42);
-#T.SetTextAlign(21);
-#cs3.Divide(2,2);
-
-
-# Select each canvas, draw bkg stacks
-#cs1.cd(1);
-#stack_lepPt.Draw();
-#cs1.cd(2);
-#stack_lepEta.Draw();
-#cs1.cd(3);
-#stack_lepPhi.Draw();
-#cs1.cd(4);
-#stack_AK8Pt.Draw();
-
-#cs2.cd(1);
-#stack_AK8Eta.Draw();
-#cs2.cd(2);
-#stack_AK8Phi.Draw();
-#cs2.cd(3);
-#stack_AK4Pt.Draw();
-#cs2.cd(4);
-#stack_AK4Eta.Draw();
-
-#cs3.cd(1);
-#stack_AK4Phi.Draw();
-#cs3.cd(2);
-#stack_AK4M.Draw();
-#cs3.cd(3);
-#stack_AK4BDisc.Draw();
-
-#T.DrawTextNDC(.5,.95,"Default drawing option"); # use the default option
-
-
-# Filling with Signal graphs
+# Filling with Data graphs
 if options.isE :
     filelistdata = ["inputfolder/CMSDAS/SingleElectron_2016_All_plots_ele.root"]
 if options.isM :
@@ -295,9 +234,7 @@ for filename  in filelistdata:
     else:
         continue
     color = ROOT.kBlack;
-#    print color
     file = ROOT.TFile(filename);
-#    print filename
     # Reading hists from file
     h_lepPtdata   = file.Get("h_lepPt");
     h_lepEtadata  = file.Get("h_lepEta");
@@ -359,35 +296,9 @@ for filename  in filelistdata:
     h_AK4Phidata.SetMarkerSize(0.7);
     h_AK4Mdata.SetMarkerSize(0.7);
     h_AK4BDiscdata.SetMarkerSize(0.7);
-
-    #Draw
-    #cs1.cd(1);
-    #h_lepPt.Draw("PESAME");
-    #cs1.cd(2);
-    #h_lepEta.Draw("SAMEPE");
-    #cs1.cd(3);
-    #h_lepPhi.Draw("SAMEPE");
-    #cs1.cd(4);
-    #h_AK8Pt.Draw("SAMEPE");
-    
-    #cs2.cd(1);
-    #h_AK8Eta.Draw("SAMEPE");
-    #cs2.cd(2);
-    #h_AK8Phi.Draw("SAMEPE");
-    #cs2.cd(3);
-    #h_AK4Pt.Draw("SAMEPE");
-    #cs2.cd(4);
-    #h_AK4Eta.Draw("SAMEPE");
-    
-    #cs3.cd(1);
-    #h_AK4Phi.Draw("SAMEPE");
-    #cs3.cd(2);
-    #h_AK4M.Draw("SAMEPE");
-    #cs3.cd(3);
-    #h_AK4BDisc.Draw("SAMEPE");
     
 # Output file
-outfilename = outname+"_stacked.root"
+outfilename = outname+"_ratio.root"
 outfile = ROOT.TFile(outfilename, "RECREATE");
 
 #Plotting and Ratio Plot
@@ -444,24 +355,7 @@ for stack in stack_list:
     h_data.Divide(h_data, h_ratio, 1, 1, "B")
     h_data.SetStats(ROOT.kFALSE)
     h_data.Draw("PE")
-    #h_ratio.Draw("PE")
     cs1.Update()
-
-# Save stacks to output file
-#outfile.Write(stack_lepPt);
-#outfile.Write(stack_lepEta);
-#outfile.Write(stack_lepPhi);
-#outfile.Write(stack_AK8Pt);
-#outfile.Write(stack_AK8Eta);
-#outfile.Write(stack_AK8Phi);
-#outfile.Write(stack_AK4Pt);
-#outfile.Write(stack_AK4Eta);
-#outfile.Write(stack_AK4Phi);
-#outfile.Write(stack_AK4M);
-#outfile.Write(stack_AK4BDisc);
-
-#stack_AK4BDisc.Write();
     cs1.Write(str(stack));
-#cs2.Write();
-#cs3.Write();
+
 file.Close();
