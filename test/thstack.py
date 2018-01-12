@@ -57,6 +57,10 @@ def decideColor(filename):
         col = ROOT.kCyan
         return col
 
+directory = "./StackedPngFiles"
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
 # Dummy hists for legend
 col = ROOT.kRed
 h_Red = ROOT.TH1F()
@@ -576,6 +580,21 @@ for stack in stack_list:
 
     cs1.Update()
     cs1.Write(str(stack));
+
+    # save png file
+    first = (str(stack).find("\""))+1
+    second = str(stack).find("\"",first)
+    savename = str(stack)[first:second]
+    spec = "_el"
+    if options.isM :
+        spec = "_mu"
+    if options.log :
+        spec += "_log"
+    else :
+        spec += "_linear"
+    savename += spec
+    cs1.SaveAs(directory+"/"+savename+".png")
+    cs1.SaveAs(directory+"/"+savename+".root")
 
 
 file.Close();
