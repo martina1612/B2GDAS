@@ -2,6 +2,7 @@
 import ROOT
 import copy
 import os.path
+import CMS_lumi, tdrstyle
 from optparse import OptionParser
 # Taken from https://root.cern.ch/doc/v608/classTHStack.html
 # Converted to python just for you!
@@ -25,7 +26,23 @@ parser.add_option('--rebin', action='store', type='int',
 
 print ""
 
-#Decides Colors based on bkg
+# CMS Lumi
+tdrstyle.setTDRStyle()
+CMS_lumi.extraText = "LPC DAS 2018"
+CMS_lumi.lumi_sqrtS = "36 fb^{-1} (13 TeV)"
+iPos = 11
+if( iPos==0 ): CMS_lumi.relPosX = 0.12
+iPeriod = 0
+
+# Print lepton channel
+chan = True      #electrons
+if options.isM :
+    chan = False #muons
+if options.isE :
+    chan = True  #electrons
+
+
+# Decides Colors based on bkg
 def decideColor(filename):
     if "WJets" in filename:
         col = ROOT.kRed
@@ -411,19 +428,32 @@ data_list  = [h_lepPtdata,
     h_mttbardata]
 
 cs1 = ROOT.TCanvas("cs1","cs1",400,500)
-pad1 = ROOT.TPad("pad1","pad1",0,0.35,1.0,1.0)
+#pad1 = ROOT.TPad("pad1","pad1",0,0.35,1.0,1.0)
+pad1 = ROOT.TPad("pad1","pad1",0,0.30,1.0,1.0)
+pad1.SetLeftMargin(0.15)
+pad1.SetRightMargin(0.05)
+pad1.SetBottomMargin(0.2) #0.12
 if options.log :
     pad1.SetLogy();
 pad1.Draw()
-pad2 = ROOT.TPad("pad1","pad2",0,0,1.0,0.35)
+#pad2 = ROOT.TPad("pad1","pad2",0,0,1.0,0.35)
+pad2 = ROOT.TPad("pad1","pad2",0,0,1.0,0.30)
+pad2.SetLeftMargin(0.15)
+pad2.SetRightMargin(0.05)
+pad2.SetBottomMargin(0.12)
 pad2.Draw()
 
+
 # Legend
-leg = ROOT.TLegend(0.79,0.69,0.99,0.99);
-leg.AddEntry(h_Red,t_Red,"f");
-leg.AddEntry(h_Blue,t_Blue,"f");
-leg.AddEntry(h_Green,t_Green,"f");
-leg.AddEntry(h_Cyan,t_Cyan,"f");
+#leg = ROOT.TLegend(0.79,0.69,0.99,0.99)
+leg = ROOT.TLegend(0.15,0.01,0.95,0.1)
+leg.SetNColumns(3)
+leg.SetBorderSize(0)
+leg.AddEntry(h_Red,t_Red,"f")
+leg.AddEntry(h_Blue,t_Blue,"f")
+leg.AddEntry(h_Green,t_Green,"f")
+leg.AddEntry(h_Cyan,t_Cyan,"f")
+leg.AddEntry(data_list[0], "Data", "pl")
 
 count = 0
 for stack in stack_list:
@@ -431,13 +461,17 @@ for stack in stack_list:
     pad1.cd()
     pad1.SetGridy()
     pad1.SetGridx()
+    stack.SetMaximum(1.2*stack.GetMaximum())
     stack.Draw("hist")
+    stack.GetXaxis().SetNdivisions(305);
     stack.GetXaxis().SetTitle(xlabels[count])
     stack.GetXaxis().SetTitleSize(0.05)
     stack.GetXaxis().SetTitleOffset(0.83)
     stack.GetYaxis().SetTitle("Counts")
-    stack.GetYaxis().SetTitleSize(0.05)
-    stack.GetYaxis().SetTitleOffset(0.83)
+    stack.GetYaxis().SetTitleSize(0.055)
+    stack.GetYaxis().SetTitleOffset(1.30)
+    stack.GetXaxis().SetLabelSize(0.045)
+    stack.GetYaxis().SetLabelSize(0.045)
     if options.log :
         stack.SetMinimum(1e-3)
     h_data = copy.deepcopy(data_list[count])
@@ -445,6 +479,7 @@ for stack in stack_list:
     count += 1
     h_data.Draw("SAMEPE")
     leg.Draw()
+    CMS_lumi.CMS_lumi(pad1, iPeriod, iPos)
     cs1.Update()
 
     #Make and Plot Ratio
@@ -460,11 +495,13 @@ for stack in stack_list:
     h_dataC.SetStats(ROOT.kFALSE)
     h_dataC.GetYaxis().SetRangeUser(0,2)
     h_dataC.GetXaxis().SetTitle("");
+    h_dataC.GetXaxis().SetNdivisions(305);
     h_dataC.GetYaxis().SetTitle("Ratio");
-    h_dataC.GetYaxis().SetTitleSize(0.09);
-    h_dataC.GetYaxis().SetTitleOffset(0.5);
-    h_dataC.GetXaxis().SetLabelSize(0.07);
-    h_dataC.GetYaxis().SetLabelSize(0.07);
+    h_dataC.GetYaxis().SetTitleSize(0.105);
+    h_dataC.GetYaxis().SetTitleOffset(0.68);
+    h_dataC.GetYaxis().SetLabelOffset(0.02);
+    h_dataC.GetXaxis().SetLabelSize(0.09);
+    h_dataC.GetYaxis().SetLabelSize(0.09);
     h_dataC.Draw("PE")
  
     xmin = h_dataC.GetBinLowEdge(1)
