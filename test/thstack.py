@@ -17,6 +17,9 @@ parser.add_option('--isM', action='store_true',
 parser.add_option('--log', action='store_true',
                       dest='log',
                       default = False,help='Set log Y')
+parser.add_option('--rebin', action='store', type='int',
+                      dest='rebin',
+                      default = 2,help='Set rebin (ngroup)')
 
 (options, args) = parser.parse_args()
 
@@ -25,13 +28,42 @@ print ""
 #Decides Colors based on bkg
 def decideColor(filename):
     if "WJets" in filename:
-        return ROOT.kRed
+        col = ROOT.kRed
+        return col
     if "ttbar" in filename:
-        return ROOT.kBlue
+        col = ROOT.kBlue
+        return col
     if "singletop" in filename:
-        return ROOT.kGreen
+        col = ROOT.kGreen
+        return col
     if "QCD" in filename:
-        return ROOT.kCyan
+        col = ROOT.kCyan
+        return col
+
+# Dummy hists for legend
+col = ROOT.kRed
+h_Red = ROOT.TH1F()
+h_Red.SetFillColor(col)
+h_Red.SetLineColor(col)
+t_Red = "W jets"
+
+col = ROOT.kBlue
+h_Blue = ROOT.TH1F()
+h_Blue.SetFillColor(col)
+h_Blue.SetLineColor(col)
+t_Blue = "ttbar"
+
+col = ROOT.kGreen
+h_Green = ROOT.TH1F()
+h_Green.SetFillColor(col)
+h_Green.SetLineColor(col)
+t_Green = "Single top"
+
+col = ROOT.kCyan
+h_Cyan = ROOT.TH1F()
+h_Cyan.SetFillColor(col)
+h_Cyan.SetLineColor(col)
+t_Cyan = "QCD"
 
 #Dictionary with weights
 weights = {"ttbar_ALL":"0.387","WJetsToLNu_Wpt-0To50":"20.567","WJetsToLNu_Wpt-50To100":"1.744","WJetsToLNu_Pt-100To250":"0.202","WJetsToLNu_Pt-250To400":"0.071","WJetsToLNu_Pt-400To600":"0.05\
@@ -44,18 +76,25 @@ _pythia8":".0006","QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8":".0002"}
 weight = 1.0
 
 # Create the THStack
-stack_lepPt = ROOT.THStack("lepPt","lepPt");
-stack_lepEta = ROOT.THStack("lepEta","lepEta");
-stack_lepPhi = ROOT.THStack("lepPhi","lepPhi");
-stack_AK8Pt = ROOT.THStack("AK8Pt","AK8Pt");
-stack_AK8Eta = ROOT.THStack("AK8Eta","AK8Eta");
-stack_AK8Phi = ROOT.THStack("AK8Phi","AK8Phi");
-stack_AK4Pt = ROOT.THStack("AK4Pt","AK4Pt");
-stack_AK4Eta = ROOT.THStack("AK4Eta","AK4Eta");
-stack_AK4Phi = ROOT.THStack("AK4Phi","AK4Phi");
-stack_AK4M = ROOT.THStack("AK4M","AK4M");
-stack_AK4BDisc = ROOT.THStack("AK4BDisc","AK4BDisc");
-stack_mttbar = ROOT.THStack("mttbar","mttbar")
+stack_lepPt = ROOT.THStack("lepPt","");
+stack_lepEta = ROOT.THStack("lepEta","");
+stack_lepPhi = ROOT.THStack("lepPhi","");
+stack_AK8Pt = ROOT.THStack("AK8Pt","");
+stack_AK8Eta = ROOT.THStack("AK8Eta","");
+stack_AK8Phi = ROOT.THStack("AK8Phi","");
+stack_AK4Pt = ROOT.THStack("AK4Pt","");
+stack_AK4Eta = ROOT.THStack("AK4Eta","");
+stack_AK4Phi = ROOT.THStack("AK4Phi","");
+stack_AK4M = ROOT.THStack("AK4M","");
+stack_AK4BDisc = ROOT.THStack("AK4BDisc","");
+stack_mttbar = ROOT.THStack("mttbar","")
+
+# Stack X axis labels
+xlabels = [ "lepton Pt [GeV]", "lepton #eta", "lepton #phi", 
+            "AK8 Pt [GeV]", "AK8 #eta", "AK8 #phi", 
+            "AK4 Pt [GeV]", "AK4 #eta", "AK4 #phi", 
+            "AK4 Mass [GeV]", "AK4 BDisc", "mttbar [GeV]"
+          ]
 
 #Define the data histograms
 h_lepPtdata   = ROOT.TH1F()
@@ -185,6 +224,20 @@ for filename  in filelistbkg:
     h_AK4BDisc.Scale(weight);
     h_mttbar.Scale(weight)
 
+    #Rebin
+    h_lepPt.Rebin(options.rebin);
+    h_lepEta.Rebin(options.rebin);
+    h_lepPhi.Rebin(options.rebin);
+    h_AK8Pt.Rebin(options.rebin);
+    h_AK8Eta.Rebin(options.rebin);
+    h_AK8Phi.Rebin(options.rebin);
+    h_AK4Pt.Rebin(options.rebin);
+    h_AK4Eta.Rebin(options.rebin);
+    h_AK4Phi.Rebin(options.rebin);
+    h_AK4M.Rebin(options.rebin);
+    h_AK4BDisc.Rebin(options.rebin);
+    h_mttbar.Rebin(options.rebin)
+    
     # Set color for this process
     h_lepPt.SetFillColor(color);
     h_lepEta.SetFillColor(color);
@@ -226,6 +279,7 @@ for filename  in filelistbkg:
     stack_AK4BDisc.Add(copy.deepcopy(h_AK4BDisc));
     stack_mttbar.Add(copy.deepcopy(h_mttbar))
 
+
 print "\n%d background file(s) skipped.\n" % skippedCount
 
 # Filling with Data graphs
@@ -258,6 +312,19 @@ for filename  in filelistdata:
     h_AK4Mdata    = file.Get("h_AK4M"+extra);
     h_AK4BDiscdata = file.Get("h_AK4Bdisc"+extra);
     h_mttbardata = file.Get("h_mttbar"+extra)
+
+    h_lepPtdata.Rebin(options.rebin);
+    h_lepEtadata.Rebin(options.rebin);
+    h_lepPhidata.Rebin(options.rebin);
+    h_AK8Ptdata.Rebin(options.rebin);
+    h_AK8Etadata.Rebin(options.rebin);
+    h_AK8Phidata.Rebin(options.rebin);
+    h_AK4Ptdata.Rebin(options.rebin);
+    h_AK4Etadata.Rebin(options.rebin);
+    h_AK4Phidata.Rebin(options.rebin);
+    h_AK4Mdata.Rebin(options.rebin);
+    h_AK4BDiscdata.Rebin(options.rebin);
+    h_mttbardata.Rebin(options.rebin)
 
     h_lepPtdata.SetMarkerStyle(20);
     h_lepEtadata.SetMarkerStyle(20);
@@ -351,19 +418,38 @@ pad1.Draw()
 pad2 = ROOT.TPad("pad1","pad2",0,0,1.0,0.35)
 pad2.Draw()
 
+# Legend
+leg = ROOT.TLegend(0.79,0.69,0.99,0.99);
+leg.AddEntry(h_Red,t_Red,"f");
+leg.AddEntry(h_Blue,t_Blue,"f");
+leg.AddEntry(h_Green,t_Green,"f");
+leg.AddEntry(h_Cyan,t_Cyan,"f");
+
 count = 0
 for stack in stack_list:
     #Plot Stacked with Data
     pad1.cd()
+    pad1.SetGridy()
+    pad1.SetGridx()
     stack.Draw("hist")
+    stack.GetXaxis().SetTitle(xlabels[count])
+    stack.GetXaxis().SetTitleSize(0.05)
+    stack.GetXaxis().SetTitleOffset(0.83)
+    stack.GetYaxis().SetTitle("Counts")
+    stack.GetYaxis().SetTitleSize(0.05)
+    stack.GetYaxis().SetTitleOffset(0.83)
+    if options.log :
+        stack.SetMinimum(1e-3)
     h_data = copy.deepcopy(data_list[count])
     print data_list[count]
     count += 1
     h_data.Draw("SAMEPE")
+    leg.Draw()
     cs1.Update()
 
     #Make and Plot Ratio
     pad2.cd()
+    pad2.SetGridy()
     h_ratio = stack.GetHistogram()
     for hist in stack.GetHists():
         h_ratio.Add(hist)
@@ -372,8 +458,23 @@ for stack in stack_list:
     h_dataC = h_data.Clone() 
     h_dataC.Divide(h_dataC, h_ratio, 1, 1, "B")
     h_dataC.SetStats(ROOT.kFALSE)
+    h_dataC.GetYaxis().SetRangeUser(0,2)
+    h_dataC.GetXaxis().SetTitle("");
+    h_dataC.GetYaxis().SetTitle("Ratio");
+    h_dataC.GetYaxis().SetTitleSize(0.09);
+    h_dataC.GetYaxis().SetTitleOffset(0.5);
+    h_dataC.GetXaxis().SetLabelSize(0.07);
+    h_dataC.GetYaxis().SetLabelSize(0.07);
     h_dataC.Draw("PE")
+ 
+    xmin = h_dataC.GetBinLowEdge(1)
+    xmax = h_dataC.GetBinLowEdge(h_dataC.GetNbinsX())+h_dataC.GetBinWidth(h_dataC.GetNbinsX())
+    line = ROOT.TLine(xmin,1,xmax,1)
+    line.SetLineColor(ROOT.kBlack)
+    line.Draw("SAME")
+
     cs1.Update()
     cs1.Write(str(stack));
+
 
 file.Close();
