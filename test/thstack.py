@@ -2,7 +2,7 @@
 import ROOT
 import copy
 import os.path
-import CMS_lumi, tdrstyle
+import CMS_lumi_lep, tdrstyle
 from optparse import OptionParser
 # Taken from https://root.cern.ch/doc/v608/classTHStack.html
 # Converted to python just for you!
@@ -28,10 +28,10 @@ print ""
 
 # CMS Lumi
 tdrstyle.setTDRStyle()
-CMS_lumi.extraText = "LPC DAS 2018"
-CMS_lumi.lumi_sqrtS = "36 fb^{-1} (13 TeV)"
+CMS_lumi_lep.extraText = "LPC DAS 2018"
+CMS_lumi_lep.lumi_sqrtS = "36 fb^{-1} (13 TeV)"
 iPos = 11
-if( iPos==0 ): CMS_lumi.relPosX = 0.12
+if( iPos==0 ): CMS_lumi_lep.relPosX = 0.12
 iPeriod = 0
 
 # Print lepton channel
@@ -93,24 +93,30 @@ _pythia8":".0006","QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8":".0002"}
 weight = 1.0
 
 # Create the THStack
-stack_lepPt = ROOT.THStack("lepPt","");
-stack_lepEta = ROOT.THStack("lepEta","");
-stack_lepPhi = ROOT.THStack("lepPhi","");
-stack_AK8Pt = ROOT.THStack("AK8Pt","");
-stack_AK8Eta = ROOT.THStack("AK8Eta","");
-stack_AK8Phi = ROOT.THStack("AK8Phi","");
-stack_AK4Pt = ROOT.THStack("AK4Pt","");
-stack_AK4Eta = ROOT.THStack("AK4Eta","");
-stack_AK4Phi = ROOT.THStack("AK4Phi","");
-stack_AK4M = ROOT.THStack("AK4M","");
-stack_AK4BDisc = ROOT.THStack("AK4BDisc","");
-stack_mttbar = ROOT.THStack("mttbar","")
+stack_lepPt          = ROOT.THStack("lepPt","")
+stack_lepEta         = ROOT.THStack("lepEta","")
+stack_lepPhi         = ROOT.THStack("lepPhi","")
+stack_AK8Pt          = ROOT.THStack("AK8Pt","")
+stack_AK8Eta         = ROOT.THStack("AK8Eta","")
+stack_AK8Phi         = ROOT.THStack("AK8Phi","")
+stack_AK4Pt          = ROOT.THStack("AK4Pt","")
+stack_AK4Eta         = ROOT.THStack("AK4Eta","")
+stack_AK4Phi         = ROOT.THStack("AK4Phi","")
+stack_AK4M           = ROOT.THStack("AK4M","")
+stack_AK4BDisc       = ROOT.THStack("AK4BDisc","")
+stack_mttbar         = ROOT.THStack("mttbar","")
+stack_AK8Tau32PreSel = ROOT.THStack("AK8Tau32PreSel","")
+stack_AK8Tau21PreSel = ROOT.THStack("AK8Tau21PreSel","")
+stack_AK4BdiscPreSel = ROOT.THStack("AK4BdiscPreSel","")
+stack_mtopHadGroomed = ROOT.THStack("AK8Tau32PreSel","")
 
 # Stack X axis labels
 xlabels = [ "lepton Pt [GeV]", "lepton #eta", "lepton #phi", 
             "AK8 Pt [GeV]", "AK8 #eta", "AK8 #phi", 
             "AK4 Pt [GeV]", "AK4 #eta", "AK4 #phi", 
-            "AK4 Mass [GeV]", "AK4 BDisc", "mttbar [GeV]"
+            "AK4 Mass [GeV]", "AK4 Btag discriminator", "mttbar [GeV]",
+            "AK8 jet #tau_{32}", "AK8 jet #tau_{21}", "AK4 Btag discriminator",
+            "AK8 jet soft-drop mass [GeV]"
           ]
 
 #Define the data histograms
@@ -226,6 +232,10 @@ for filename  in filelistbkg:
     h_AK4M    = file.Get("h_AK4M"+extra);
     h_AK4BDisc = file.Get("h_AK4Bdisc"+extra);
     h_mttbar   = file.Get("h_mttbar"+extra)
+    h_AK8Tau32PreSel = file.Get("h_AK8Tau32PreSel"+extra)
+    h_AK8Tau21PreSel = file.Get("h_AK8Tau21PreSel"+extra)
+    h_AK4BdiscPreSel = file.Get("h_AK4BdiscPreSel"+extra)
+    h_mtopHadGroomed = file.Get("h_mtopHadGroomed"+extra)
 
     #Scale
     h_lepPt.Scale(weight);
@@ -240,6 +250,10 @@ for filename  in filelistbkg:
     h_AK4M.Scale(weight);
     h_AK4BDisc.Scale(weight);
     h_mttbar.Scale(weight)
+    h_AK8Tau32PreSel.Scale(weight)
+    h_AK8Tau21PreSel.Scale(weight)
+    h_AK4BdiscPreSel.Scale(weight)
+    h_mtopHadGroomed.Scale(weight)
 
     #Rebin
     h_lepPt.Rebin(options.rebin);
@@ -254,7 +268,11 @@ for filename  in filelistbkg:
     h_AK4M.Rebin(options.rebin);
     h_AK4BDisc.Rebin(options.rebin);
     h_mttbar.Rebin(options.rebin)
-    
+    h_AK8Tau32PreSel.Rebin(options.rebin)  
+    h_AK8Tau21PreSel.Rebin(options.rebin)  
+    h_AK4BdiscPreSel.Rebin(options.rebin)
+    h_mtopHadGroomed.Rebin(options.rebin)
+ 
     # Set color for this process
     h_lepPt.SetFillColor(color);
     h_lepEta.SetFillColor(color);
@@ -268,6 +286,10 @@ for filename  in filelistbkg:
     h_AK4M.SetFillColor(color);
     h_AK4BDisc.SetFillColor(color);
     h_mttbar.SetFillColor(color)
+    h_AK8Tau32PreSel.SetFillColor(color)
+    h_AK8Tau21PreSel.SetFillColor(color)
+    h_AK4BdiscPreSel.SetFillColor(color)
+    h_mtopHadGroomed.SetFillColor(color)
 
     h_lepPt.SetLineColor(color);
     h_lepEta.SetLineColor(color);
@@ -281,6 +303,10 @@ for filename  in filelistbkg:
     h_AK4M.SetLineColor(color);
     h_AK4BDisc.SetLineColor(color);
     h_mttbar.SetLineColor(color)
+    h_AK8Tau32PreSel.SetLineColor(color)
+    h_AK8Tau21PreSel.SetLineColor(color)
+    h_AK4BdiscPreSel.SetLineColor(color)
+    h_mtopHadGroomed.SetLineColor(color)
 
     # Filling stacks
     stack_lepPt.Add(copy.deepcopy(h_lepPt));
@@ -295,6 +321,10 @@ for filename  in filelistbkg:
     stack_AK4M.Add(copy.deepcopy(h_AK4M));
     stack_AK4BDisc.Add(copy.deepcopy(h_AK4BDisc));
     stack_mttbar.Add(copy.deepcopy(h_mttbar))
+    stack_AK8Tau32PreSel.Add(copy.deepcopy(h_AK8Tau32PreSel))
+    stack_AK8Tau21PreSel.Add(copy.deepcopy(h_AK8Tau21PreSel))
+    stack_AK4BdiscPreSel.Add(copy.deepcopy(h_AK4BdiscPreSel))
+    stack_mtopHadGroomed.Add(copy.deepcopy(h_mtopHadGroomed))
 
 
 print "\n%d background file(s) skipped.\n" % skippedCount
@@ -329,6 +359,10 @@ for filename  in filelistdata:
     h_AK4Mdata    = file.Get("h_AK4M"+extra);
     h_AK4BDiscdata = file.Get("h_AK4Bdisc"+extra);
     h_mttbardata = file.Get("h_mttbar"+extra)
+    h_AK8Tau32PreSeldata= file.Get("h_AK8Tau32PreSel"+extra)
+    h_AK8Tau21PreSeldata= file.Get("h_AK8Tau21PreSel"+extra)
+    h_AK4BdiscPreSeldata= file.Get("h_AK4BdiscPreSel"+extra)
+    h_mtopHadGroomeddata= file.Get("h_mtopHadGroomed"+extra)
 
     h_lepPtdata.Rebin(options.rebin);
     h_lepEtadata.Rebin(options.rebin);
@@ -342,6 +376,10 @@ for filename  in filelistdata:
     h_AK4Mdata.Rebin(options.rebin);
     h_AK4BDiscdata.Rebin(options.rebin);
     h_mttbardata.Rebin(options.rebin)
+    h_AK8Tau32PreSeldata.Rebin(options.rebin)
+    h_AK8Tau21PreSeldata.Rebin(options.rebin)
+    h_AK4BdiscPreSeldata.Rebin(options.rebin)
+    h_mtopHadGroomeddata.Rebin(options.rebin)
 
     h_lepPtdata.SetMarkerStyle(20);
     h_lepEtadata.SetMarkerStyle(20);
@@ -355,6 +393,10 @@ for filename  in filelistdata:
     h_AK4Mdata.SetMarkerStyle(20);
     h_AK4BDiscdata.SetMarkerStyle(20);
     h_mttbardata.SetMarkerStyle(20)
+    h_AK8Tau32PreSeldata.SetMarkerStyle(20)
+    h_AK8Tau21PreSeldata.SetMarkerStyle(20)
+    h_AK4BdiscPreSeldata.SetMarkerStyle(20)
+    h_mtopHadGroomeddata.SetMarkerStyle(20)
 
     # Set color for this process
     h_lepPtdata.SetMarkerColor(color);
@@ -369,6 +411,10 @@ for filename  in filelistdata:
     h_AK4Mdata.SetMarkerColor(color);
     h_AK4BDiscdata.SetMarkerColor(color);
     h_mttbardata.SetMarkerColor(color)
+    h_AK8Tau32PreSeldata.SetMarkerColor(color)
+    h_AK8Tau21PreSeldata.SetMarkerColor(color)
+    h_AK4BdiscPreSeldata.SetMarkerColor(color)
+    h_mtopHadGroomeddata.SetMarkerColor(color)
 
     h_lepPtdata.SetLineColor(color);
     h_lepEtadata.SetLineColor(color);
@@ -382,6 +428,10 @@ for filename  in filelistdata:
     h_AK4Mdata.SetLineColor(color);
     h_AK4BDiscdata.SetLineColor(color);
     h_mttbardata.SetLineColor(color)
+    h_AK8Tau32PreSeldata.SetLineColor(color)
+    h_AK8Tau21PreSeldata.SetLineColor(color)
+    h_AK4BdiscPreSeldata.SetLineColor(color)
+    h_mtopHadGroomeddata.SetLineColor(color)
 
     h_lepPtdata.SetMarkerSize(0.7);
     h_lepEtadata.SetMarkerSize(0.7);
@@ -395,6 +445,10 @@ for filename  in filelistdata:
     h_AK4Mdata.SetMarkerSize(0.7);
     h_AK4BDiscdata.SetMarkerSize(0.7);
     h_mttbardata.SetMarkerSize(0.7)
+    h_AK8Tau32PreSeldata.SetMarkerSize(0.7)
+    h_AK8Tau21PreSeldata.SetMarkerSize(0.7)
+    h_AK4BdiscPreSeldata.SetMarkerSize(0.7)
+    h_mtopHadGroomeddata.SetMarkerSize(0.7)
 
 # Output file
 outfilename = outname+"_ratio.root"
@@ -413,7 +467,12 @@ stack_list = [stack_lepPt,
     stack_AK4Phi,
     stack_AK4M,
     stack_AK4BDisc,
-    stack_mttbar]
+    stack_mttbar,
+    stack_AK8Tau32PreSel,
+    stack_AK8Tau21PreSel,
+    stack_AK4BdiscPreSel,
+    stack_mtopHadGroomed
+    ]
 data_list  = [h_lepPtdata,
     h_lepEtadata,
     h_lepPhidata,
@@ -425,7 +484,12 @@ data_list  = [h_lepPtdata,
     h_AK4Phidata,
     h_AK4Mdata,
     h_AK4BDiscdata,
-    h_mttbardata]
+    h_mttbardata,
+    h_AK8Tau32PreSeldata,
+    h_AK8Tau21PreSeldata,
+    h_AK4BdiscPreSeldata,
+    h_mtopHadGroomeddata
+    ]
 
 cs1 = ROOT.TCanvas("cs1","cs1",400,500)
 #pad1 = ROOT.TPad("pad1","pad1",0,0.35,1.0,1.0)
@@ -479,7 +543,7 @@ for stack in stack_list:
     count += 1
     h_data.Draw("SAMEPE")
     leg.Draw()
-    CMS_lumi.CMS_lumi(pad1, iPeriod, iPos)
+    CMS_lumi_lep.CMS_lumi(pad1, iPeriod, iPos, chan)
     cs1.Update()
 
     #Make and Plot Ratio
